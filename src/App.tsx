@@ -1,25 +1,52 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import LoginPage from './client/pages/LoginPage';
+import DashboardPage from './client/pages/DashboardPage';
+import AdminDashboard from './admin/pages/AdminDashboard';
+import { Employee } from './employees';
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#007bff',
+    },
+    secondary: {
+      main: '#6c757d',
+    },
+  },
+  typography: {
+    fontFamily: 'Poppins, Roboto, sans-serif',
+  },
+});
 
 function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [employeeData, setEmployeeData] = useState<Employee | null>(null);
+
+  const handleLoginSuccess = (employee: Employee) => {
+    console.log('Login successful:', employee);
+    setIsLoggedIn(true);
+    setEmployeeData(employee);
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setEmployeeData(null);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<LoginPage onLoginSuccess={handleLoginSuccess} />} />
+          <Route path="/" element={isLoggedIn ? <DashboardPage employeeData={employeeData!} onLogout={handleLogout} /> : <Navigate to="/login" />} />
+          <Route path="/admin" element={isLoggedIn && employeeData?.isAdmin ? <AdminDashboard /> : <Navigate to="/" />} />
+        </Routes>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }
 
