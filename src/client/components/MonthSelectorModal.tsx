@@ -28,7 +28,7 @@ const MonthSelectorModal: React.FC<MonthSelectorModalProps> = ({ open, onClose, 
         sx={{
           width: '90%', // Ширина модального окна в процентах от ширины экрана
           maxWidth: 400, // Максимальная ширина
-          height: '70%', // Высота модального окна
+          height: '60%', // Высота модального окна
           bgcolor: 'background.paper',
           borderRadius: 2,
           p: 2,

@@ -29,7 +29,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ employeeData, onLogout })
   return (
     <Container maxWidth="xs" sx={{ 
       background: '#f4f4f4',
-      minHeight: '65vh', 
+      minHeight: 'auto', 
       display: 'flex', 
       flexDirection: 'column', 
       overflow: 'hidden', 

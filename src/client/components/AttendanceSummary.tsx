@@ -79,10 +79,11 @@ const AttendanceSummary: React.FC<AttendanceSummaryProps> = ({ attendanceSummary
       </Box>
       <Grid container spacing={2}>
         {Object.entries(attendanceSummary).map(([key, value]) => (
-          <Grid item xs={12} sm={6} key={key}>
+          <Grid item xs={6} sm={3} key={key}>
             <Paper
               elevation={3}
               sx={{
+                height: 70,
                 p: 2,
                 textAlign: 'left',
                 background: `${statusColors[key as keyof typeof statusColors].background}`,

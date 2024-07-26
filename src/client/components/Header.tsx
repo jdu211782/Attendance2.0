@@ -45,8 +45,6 @@ const Header: React.FC<HeaderProps> = ({ employeeName, onLogout, anchorEl, handl
                   bgcolor: '#ff3b30',
                   color: '#ffffff',
                 },
-                px: 2,
-                py: 1,
                 width: '100%',
               },
             },

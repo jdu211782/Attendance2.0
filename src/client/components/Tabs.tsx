@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tabs, Tab, createTheme, ThemeProvider } from '@mui/material';
+import { Tabs, Tab, createTheme, ThemeProvider, styled } from '@mui/material';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import BarChartIcon from '@mui/icons-material/BarChart';
 
@@ -7,6 +7,15 @@ interface TabsProps {
   tabIndex: number;
   handleTabChange: (event: React.ChangeEvent<{}>, newValue: number) => void;
 }
+
+const StyledTabs = styled(Tabs)(({ theme }) => ({
+  minHeight: 'auto',
+  '& .MuiTab-root': {
+    minWidth: 120,
+    minHeight: 50,
+    fontSize: '1rem',
+  },
+}));
 
 const TabsComponent: React.FC<TabsProps> = ({ tabIndex, handleTabChange }) => {
   // Создаем локальную тему с переопределенными цветами
@@ -21,17 +30,20 @@ const TabsComponent: React.FC<TabsProps> = ({ tabIndex, handleTabChange }) => {
   return (
     // Оборачиваем Tabs в ThemeProvider с локальной темой
     <ThemeProvider theme={localTheme}>
-      <Tabs
+      <StyledTabs
         value={tabIndex}
         onChange={handleTabChange}
         centered
-        sx={{
-          mb: 2, 
-        }}
       >
-        <Tab icon={<AccessTimeIcon />} aria-label="time" />
-        <Tab icon={<BarChartIcon />} aria-label="summary" />
-      </Tabs>
+        <Tab
+          icon={<AccessTimeIcon sx={{ fontSize: 32 }} />}
+          aria-label="time"
+        />
+        <Tab
+          icon={<BarChartIcon sx={{ fontSize: 32 }} />}
+          aria-label="summary"
+        />
+      </StyledTabs>
     </ThemeProvider>
   );
 };
