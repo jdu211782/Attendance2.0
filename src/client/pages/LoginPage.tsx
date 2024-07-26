@@ -1,7 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Employee, employees } from '../../employees';
-import { Box, TextField, Button, Typography, Container, useTheme } from '@mui/material';
+import {
+  Box,
+  TextField,
+  Button,
+  Typography,
+  Container,
+  useTheme,
+} from '@mui/material';
 
 interface LoginPageProps {
   onLoginSuccess: (employee: Employee) => void;
@@ -34,10 +41,10 @@ function LoginPage({ onLoginSuccess }: LoginPageProps) {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          padding: 3, 
-          borderRadius: 4, 
-          boxShadow: 3, 
-          backgroundColor: '#f0f8ff', 
+          padding: 3,
+          borderRadius: 4,
+          boxShadow: 3,
+          backgroundColor: '#f0f8ff',
         }}
       >
         <Typography component="h1" variant="h5">
@@ -48,7 +55,7 @@ function LoginPage({ onLoginSuccess }: LoginPageProps) {
           required
           fullWidth
           id="username"
-          label="username"
+          label="Username"
           name="username"
           autoComplete="username"
           autoFocus
@@ -60,7 +67,7 @@ function LoginPage({ onLoginSuccess }: LoginPageProps) {
           required
           fullWidth
           name="password"
-          label="password"
+          label="Password"
           type="password"
           id="password"
           autoComplete="current-password"
@@ -76,12 +83,12 @@ function LoginPage({ onLoginSuccess }: LoginPageProps) {
           type="submit"
           fullWidth
           variant="contained"
-          sx={{ 
-            mt: 3, 
-            mb: 2, 
-            backgroundColor: theme.palette.success.light, 
+          sx={{
+            mt: 3,
+            mb: 2,
+            backgroundColor: theme.palette.success.light,
             '&:hover': {
-              backgroundColor: theme.palette.success.dark, 
+              backgroundColor: theme.palette.success.dark,
             },
           }}
           onClick={handleLogin}
