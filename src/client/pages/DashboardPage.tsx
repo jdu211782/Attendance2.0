@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Container, Box } from '@mui/material';
 import Header from '../components/Header';
 import MainContent from '../components/MainContent';
-import AttendanceSummary from '../components/AttendanceSummary';
 import '@fontsource/poppins/500.css';
 
 interface DashboardPageProps {
@@ -34,7 +33,8 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ employeeData, onLogout })
       flexDirection: 'column', 
       overflow: 'hidden', 
       p: 2,
-      paddingBottom: '20px'
+      paddingBottom: '20px',
+      pt: 4, // Паддинг сверху для поднятия содержимого
     }}>
       <Header
         onLogout={onLogout}

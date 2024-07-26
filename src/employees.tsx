@@ -38,5 +38,25 @@ export const employees: Employee[] = [
       leaves: 4
     }
   },
+  {
+    id: '2',
+    username: 'Dog',
+    password: 'dog123',
+    name: 'Dog',
+    photoUrl: 'images/kotek.png',
+    isAdmin: true,
+    checkInTime: new Date(),  
+    checkOutTime: null, 
+    location: 'office',      
+    role: 'Administrator',
+    status: 'Present',
+    attendanceSummary: {
+      earlyLeaves: 0,
+      absences: 0,
+      lateIns: 0,
+      leaves: 0
+    }
+  },
+  
 ];
 

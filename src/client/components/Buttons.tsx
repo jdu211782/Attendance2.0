@@ -8,15 +8,6 @@ interface TabsProps {
   handleTabChange: (event: React.ChangeEvent<{}>, newValue: number) => void;
 }
 
-const StyledTabs = styled(Tabs)(({ theme }) => ({
-  minHeight: 'auto',
-  '& .MuiTab-root': {
-    minWidth: 120,
-    minHeight: 50,
-    fontSize: '1rem',
-  },
-}));
-
 const TabsComponent: React.FC<TabsProps> = ({ tabIndex, handleTabChange }) => {
   // Создаем локальную тему с переопределенными цветами
   const localTheme = createTheme({
@@ -28,12 +19,32 @@ const TabsComponent: React.FC<TabsProps> = ({ tabIndex, handleTabChange }) => {
   });
 
   return (
-    // Оборачиваем Tabs в ThemeProvider с локальной темой
-    <ThemeProvider theme={localTheme}>
-      <StyledTabs
+      <Tabs
         value={tabIndex}
         onChange={handleTabChange}
         centered
+        sx={{
+          minHeight: 'auto',
+          backgroundColor: '#f0f0f0',
+          borderRadius: 8,
+          '& .MuiTab-root': {
+            minWidth: 120,
+            minHeight: 50,
+            fontSize: '1rem',
+            color: '#333',
+            transition: 'background-color 0.3s ease, transform 0.3s ease',
+            '&:hover': {
+              backgroundColor: '#e0e0e0',
+              transform: 'scale(1.05)',
+            },
+            '&.Mui-selected': {
+              backgroundColor: '#ffebea',
+              color: '#ff3b30',
+              fontWeight: 'bold',
+              borderBottom: '2px solid #ff3b30',
+            },
+          },
+        }}
       >
         <Tab
           icon={<AccessTimeIcon sx={{ fontSize: 32 }} />}
@@ -43,8 +54,7 @@ const TabsComponent: React.FC<TabsProps> = ({ tabIndex, handleTabChange }) => {
           icon={<BarChartIcon sx={{ fontSize: 32 }} />}
           aria-label="summary"
         />
-      </StyledTabs>
-    </ThemeProvider>
+      </Tabs>
   );
 };
 

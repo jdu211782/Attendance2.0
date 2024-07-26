@@ -18,7 +18,7 @@ const MainContent: React.FC<MainContentProps> = ({ tabIndex, handleTabChange, at
   const [checkOutTime, setCheckOutTime] = React.useState<Date | null>(null);
   const [totalHours, setTotalHours] = React.useState<string>('--:--');
   const [message, setMessage] = React.useState<string | null>(null);
-
+  
   const handleComeClick = () => {
     const now = new Date();
     setCheckInTime(now);
@@ -40,10 +40,52 @@ const MainContent: React.FC<MainContentProps> = ({ tabIndex, handleTabChange, at
   };
 
   return (
-    <Box sx={{ flexGrow: 1, bgcolor: 'white', borderRadius: 4, boxShadow: 3, p: 3, overflow: 'hidden', textAlign: 'center' }}>
-      <Tabs value={tabIndex} onChange={handleTabChange} centered sx={{ mb: 2 }}>
-        <Tab icon={<AccessTimeIcon />} aria-label="time" />
-        <Tab icon={<BarChartIcon />} aria-label="summary" />
+    <Box
+      sx={{
+        flexGrow: 1,
+        bgcolor: 'white',
+        borderRadius: 4,
+        boxShadow: 3,
+        p: 3,
+        overflow: 'hidden',
+        textAlign: 'center',
+        position: 'relative',
+        padding:1,
+      }}
+    >
+      <Tabs
+        value={tabIndex}
+        onChange={handleTabChange}
+        centered
+        sx={{
+          mb: 2,
+          width: '100%', // Ensure Tabs take up full width
+          '.MuiTabs-flexContainer': {
+            width: '100%', // Ensure Tabs flex container takes up full width
+          },
+          '.MuiTab-root': {
+            flexGrow: 1, // Allow Tabs to expand to full width
+            minWidth: 120,
+            minHeight: 50,
+            fontSize: '1rem',
+            transition: 'background-color 0.3s ease, transform 0.3s ease',
+            '&:hover': {
+              transform: 'scale(1.05)',
+            },
+            '&.Mui-selected': {
+              fontWeight: 'bold',
+            },
+          },
+        }}
+      >
+        <Tab
+          icon={<AccessTimeIcon sx={{ fontSize: 32 }} />}
+          aria-label="time"
+        />
+        <Tab
+          icon={<BarChartIcon sx={{ fontSize: 32 }} />}
+          aria-label="summary"
+        />
       </Tabs>
       {tabIndex === 0 && (
         <>

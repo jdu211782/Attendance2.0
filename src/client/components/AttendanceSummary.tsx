@@ -57,7 +57,7 @@ const AttendanceSummary: React.FC<AttendanceSummaryProps> = ({ attendanceSummary
 
   return (
     <Box sx={{ p: 3, borderRadius: 4, backgroundColor: '#ffffff', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', width: '100%' }}>
+      <Box sx={{ display: 'flex', marginTop: -3.5, flexDirection: 'column', alignItems: 'flex-start', width: '100%' }}>
         <Typography
           variant="h6"
           sx={{
