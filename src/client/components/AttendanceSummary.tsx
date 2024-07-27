@@ -1,4 +1,4 @@
-// AttendanceSummary
+// AttendanceSummary.tsx
 
 import React, { useState } from 'react';
 import { Box, Typography, Grid, Paper, IconButton } from '@mui/material';
@@ -14,6 +14,7 @@ interface AttendanceSummaryProps {
   };
 }
 
+// Цветовая схема для разных статусов
 const statusColors = {
   earlyLeaves: {
     background: '#f1f1ff',
@@ -37,33 +38,40 @@ const statusColors = {
   },
 };
 
+// Массив названий месяцев
 const months = [
   'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'
 ];
 
 const AttendanceSummary: React.FC<AttendanceSummaryProps> = ({ attendanceSummary }) => {
+  // Состояние для управления открытием/закрытием модального окна выбора месяца
   const [open, setOpen] = useState(false);
-  const [selectedMonth, setSelectedMonth] = useState<number>(4);
-  const [selectedYear, setSelectedYear] = useState<number>(2024);
+  const [selectedMonth, setSelectedMonth] = useState<number>(4); // Изначально выбран май
+  const [selectedYear, setSelectedYear] = useState<number>(2024); // Изначально выбран 2024 год
 
+  // Функция для открытия модального окна
   const handleOpen = () => setOpen(true);
+  // Функция для закрытия модального окна
   const handleClose = () => setOpen(false);
+  // Обработчик изменения месяца
   const handleMonthChange = (event: SelectChangeEvent<number>) => {
     setSelectedMonth(event.target.value as number);
     handleClose();
   };
+  // Обработчик изменения года
   const handleYearChange = (event: SelectChangeEvent<number>) => {
     setSelectedYear(event.target.value as number);
   };
 
   return (
     <Box sx={{ p: 3, borderRadius: 4, backgroundColor: '#ffffff', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
+      {/* Заголовок и кнопка для выбора месяца */}
       <Box sx={{ display: 'flex', marginTop: -3.5, flexDirection: 'column', alignItems: 'flex-start', width: '100%' }}>
-        <Typography variant="h6" sx={{ mb: 1, color: '#1c1f26', alignSelf: 'flex-start' }}>
+        <Typography variant="h6" sx={{ mt: 1, color: '#1c1f26', alignSelf: 'flex-start', fontSize: '15px' }}>
           Attendance
         </Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between', mb: 2 }}>
-          <Typography variant="h6" sx={{ color: '#1c1f26' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between', mb: 0 }}>
+          <Typography variant="h6" sx={{ color: '#1c1f26', fontSize: '22px' }}>
             {months[selectedMonth]} {selectedYear}
           </Typography>
           <IconButton onClick={handleOpen} sx={{ color: '#105f82' }}>
@@ -71,7 +79,9 @@ const AttendanceSummary: React.FC<AttendanceSummaryProps> = ({ attendanceSummary
           </IconButton>
         </Box>
       </Box>
-      <Grid container spacing={2}>
+      
+      {/* Секция с карточками для отображения данных */}
+      <Grid container spacing={1}>
         {Object.entries(attendanceSummary).map(([key, value]) => (
           <Grid item xs={6} sm={3} key={key}>
             <Paper
@@ -82,7 +92,7 @@ const AttendanceSummary: React.FC<AttendanceSummaryProps> = ({ attendanceSummary
                 textAlign: 'left',
                 background: `${statusColors[key as keyof typeof statusColors].background}`,
                 position: 'relative',
-                borderRadius: 3,
+                borderRadius: '5px 5px 10px 10px',
                 boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
                 transition: 'box-shadow 0.3s ease',
                 '&:hover': {
@@ -100,7 +110,7 @@ const AttendanceSummary: React.FC<AttendanceSummaryProps> = ({ attendanceSummary
                 },
               }}
             >
-              <Typography variant="body1" sx={{ color: '#1c1f26', fontSize: '1.25rem' }}>
+              <Typography variant="body1" sx={{ color: '#1c1f26', fontSize: '1.2rem' }}>
                 {String(value)}
               </Typography>
               <Typography variant="body2" sx={{ color: `${statusColors[key as keyof typeof statusColors].textColor}` }}>
@@ -111,6 +121,7 @@ const AttendanceSummary: React.FC<AttendanceSummaryProps> = ({ attendanceSummary
         ))}
       </Grid>
 
+      {/* Модальное окно для выбора месяца и года */}
       <MonthSelectorModal
         open={open}
         onClose={handleClose}
@@ -120,6 +131,7 @@ const AttendanceSummary: React.FC<AttendanceSummaryProps> = ({ attendanceSummary
         onYearChange={handleYearChange}
       />
 
+      {/* Компонент для отображения недельного графика */}
       <WeeklyTimesheet timesheetData={timesheetData} />
     </Box>
   );

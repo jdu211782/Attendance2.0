@@ -1,5 +1,3 @@
-// MainContent.tsx
-
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button, Divider, Tabs, Tab } from '@mui/material';
 import { format, intervalToDuration } from 'date-fns';
@@ -8,42 +6,46 @@ import BarChartIcon from '@mui/icons-material/BarChart';
 import AttendanceSummary from './AttendanceSummary';
 
 interface MainContentProps {
-  tabIndex: number;
-  handleTabChange: (event: React.ChangeEvent<{}>, newValue: number) => void;
+  tabIndex: number; // Текущий индекс активной вкладки
+  handleTabChange: (event: React.ChangeEvent<{}>, newValue: number) => void; // Обработчик смены вкладок
   attendanceSummary: {
-    [key: string]: number;
+    [key: string]: number; // Данные резюме посещаемости
   };
 }
 
 const MainContent: React.FC<MainContentProps> = ({ tabIndex, handleTabChange, attendanceSummary }) => {
-  const [checkInTime, setCheckInTime] = useState<Date | null>(null);
-  const [checkOutTime, setCheckOutTime] = useState<Date | null>(null);
-  const [totalHours, setTotalHours] = useState<string>('--:--');
-  const [message, setMessage] = useState<string | null>(null);
-  const [currentTime, setCurrentTime] = useState<string>(format(new Date(), 'HH:mm:ss'));
+  const [checkInTime, setCheckInTime] = useState<Date | null>(null); // Время входа
+  const [checkOutTime, setCheckOutTime] = useState<Date | null>(null); // Время выхода
+  const [totalHours, setTotalHours] = useState<string>('--:--'); // Всего часов
+  const [message, setMessage] = useState<string | null>(null); // Сообщение для пользователя
+  const [currentTime, setCurrentTime] = useState<string>(format(new Date(), 'HH:mm:ss')); // Текущее время
 
+  // Обновление текущего времени каждую секунду
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTime(format(new Date(), 'HH:mm:ss'));
     }, 1000);
 
-    // Clean up interval on component unmount
+    // Очистка интервала при размонтировании компонента
     return () => clearInterval(interval);
   }, []);
 
+  // Обработка нажатия кнопки "Come"
   const handleComeClick = () => {
     const now = new Date();
     setCheckInTime(now);
     setMessage(`Welcome! You checked in at ${format(now, 'HH:mm')}`);
-    setCheckOutTime(null);
-    setTotalHours('--:--');
+    setCheckOutTime(null); // При входе время выхода сбрасывается
+    setTotalHours('--:--'); // При входе общее время также сбрасывается
   };
 
+  // Обработка нажатия кнопки "Leave"
   const handleLeaveClick = () => {
     if (checkInTime) {
       const now = new Date();
       setCheckOutTime(now);
       setMessage(`Goodbye! You checked out at ${format(now, 'HH:mm')}`);
+      // Вычисление продолжительности работы
       const duration = intervalToDuration({ start: checkInTime, end: now });
       setTotalHours(`${duration.hours || 0}h ${duration.minutes || 0}m`);
     } else {
@@ -65,18 +67,19 @@ const MainContent: React.FC<MainContentProps> = ({ tabIndex, handleTabChange, at
         padding: 1,
       }}
     >
+      {/* Вкладки для переключения между временем и резюме */}
       <Tabs
         value={tabIndex}
         onChange={handleTabChange}
         centered
         sx={{
           mb: 2,
-          width: '100%', // Ensure Tabs take up full width
+          width: '100%', // Убедитесь, что вкладки занимают всю ширину
           '.MuiTabs-flexContainer': {
-            width: '100%', // Ensure Tabs flex container takes up full width
+            width: '100%', // Убедитесь, что контейнер вкладок занимает всю ширину
           },
           '.MuiTab-root': {
-            flexGrow: 1, // Allow Tabs to expand to full width
+            flexGrow: 1, // Позволяет вкладкам расширяться на всю ширину
             minWidth: 120,
             minHeight: 50,
             fontSize: '1rem',
@@ -99,6 +102,8 @@ const MainContent: React.FC<MainContentProps> = ({ tabIndex, handleTabChange, at
           aria-label="summary"
         />
       </Tabs>
+
+      {/* Контент для вкладки времени */}
       {tabIndex === 0 && (
         <>
           <Typography variant="h3" sx={{ fontWeight: 'bold', color: '#1c1f26' }}>
@@ -170,6 +175,8 @@ const MainContent: React.FC<MainContentProps> = ({ tabIndex, handleTabChange, at
           )}
         </>
       )}
+
+      {/* Контент для вкладки резюме */}
       {tabIndex === 1 && <AttendanceSummary attendanceSummary={attendanceSummary} />}
     </Box>
   );
