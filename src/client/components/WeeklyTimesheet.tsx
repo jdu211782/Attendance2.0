@@ -1,4 +1,4 @@
-// WeeklyTimesheet
+// WeeklyTimesheet.tsx
 
 import React from 'react';
 import { Box, Typography, Grid, MenuItem, Select, FormControl, SelectChangeEvent } from '@mui/material';
@@ -94,25 +94,25 @@ const WeeklyTimesheet: React.FC<WeeklyTimesheetProps> = ({ timesheetData }) => {
               boxShadow: 1,
             }}>
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '60px' }}>
-                <Typography variant="body2">
+                <Typography variant="body2" sx={{ fontSize: '12px' }}>
                   {formatDay(day.day)} {day.weekday}
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <AccessTimeIcon sx={{ mr: 0.5, color: getTimeColor(day.checkIn, true) }} />
-                <Typography variant="body2" sx={{ color: getTimeColor(day.checkIn, true) }}>
+                <Typography variant="body2" sx={{ color: getTimeColor(day.checkIn, true), fontSize: '12px' }}>
                   {day.checkIn || '--:--'}
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <ExitToAppIcon sx={{ mr: 0.5, color: getTimeColor(day.checkOut, false) }} />
-                <Typography variant="body2" sx={{ color: getTimeColor(day.checkOut, false) }}>
+                <Typography variant="body2" sx={{ color: getTimeColor(day.checkOut, false), fontSize: '12px' }}>
                   {day.checkOut || '--:--'}
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <TimelapseIcon sx={{ mr: 0.5, color: getTotalHoursColor(day.totalHours) }} />
-                <Typography variant="body2" sx={{ color: getTotalHoursColor(day.totalHours) }}>
+                <Typography variant="body2" sx={{ color: getTotalHoursColor(day.totalHours), fontSize: '12px' }}>
                   {day.totalHours || '--:--'}
                 </Typography>
               </Box>
@@ -125,7 +125,3 @@ const WeeklyTimesheet: React.FC<WeeklyTimesheetProps> = ({ timesheetData }) => {
 };
 
 export default WeeklyTimesheet;
-
-
-
-
