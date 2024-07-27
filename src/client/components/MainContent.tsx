@@ -1,6 +1,6 @@
 // MainContent.tsx
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button, Divider, Tabs, Tab } from '@mui/material';
 import { format, intervalToDuration } from 'date-fns';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
@@ -16,11 +16,21 @@ interface MainContentProps {
 }
 
 const MainContent: React.FC<MainContentProps> = ({ tabIndex, handleTabChange, attendanceSummary }) => {
-  const [checkInTime, setCheckInTime] = React.useState<Date | null>(null);
-  const [checkOutTime, setCheckOutTime] = React.useState<Date | null>(null);
-  const [totalHours, setTotalHours] = React.useState<string>('--:--');
-  const [message, setMessage] = React.useState<string | null>(null);
-  
+  const [checkInTime, setCheckInTime] = useState<Date | null>(null);
+  const [checkOutTime, setCheckOutTime] = useState<Date | null>(null);
+  const [totalHours, setTotalHours] = useState<string>('--:--');
+  const [message, setMessage] = useState<string | null>(null);
+  const [currentTime, setCurrentTime] = useState<string>(format(new Date(), 'HH:mm:ss'));
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(format(new Date(), 'HH:mm:ss'));
+    }, 1000);
+
+    // Clean up interval on component unmount
+    return () => clearInterval(interval);
+  }, []);
+
   const handleComeClick = () => {
     const now = new Date();
     setCheckInTime(now);
@@ -52,7 +62,7 @@ const MainContent: React.FC<MainContentProps> = ({ tabIndex, handleTabChange, at
         overflow: 'hidden',
         textAlign: 'center',
         position: 'relative',
-        padding:1,
+        padding: 1,
       }}
     >
       <Tabs
@@ -92,7 +102,7 @@ const MainContent: React.FC<MainContentProps> = ({ tabIndex, handleTabChange, at
       {tabIndex === 0 && (
         <>
           <Typography variant="h3" sx={{ fontWeight: 'bold', color: '#1c1f26' }}>
-            {format(new Date(), 'HH:mm:ss')}
+            {currentTime}
           </Typography>
           <Typography variant="h6" color="#666666" sx={{ fontSize: '0.70rem' }}>
             {format(new Date(), 'PPP - EEEE')}
