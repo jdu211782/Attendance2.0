@@ -1,3 +1,5 @@
+// LoginPage.tsx
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Employee, employees } from '../../employees';
@@ -34,17 +36,26 @@ function LoginPage({ onLoginSuccess }: LoginPageProps) {
   };
 
   return (
-    <Container maxWidth="xs">
+    <Container
+      maxWidth="sm" // Увеличиваем ширину контейнера
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
       <Box
         sx={{
-          marginTop: 8,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          padding: 3,
+          padding: 4, // Увеличиваем padding
           borderRadius: 4,
           boxShadow: 3,
           backgroundColor: '#f0f8ff',
+          width: '100%', // Ширина блока должна быть 100% от ширины контейнера
+          maxWidth: 400, // Ограничение максимальной ширины для предотвращения слишком большой растяжки
         }}
       >
         <Typography component="h1" variant="h5">

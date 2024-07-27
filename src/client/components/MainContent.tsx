@@ -1,3 +1,5 @@
+// MainContent.tsx
+
 import React from 'react';
 import { Box, Typography, Button, Divider, Tabs, Tab } from '@mui/material';
 import { format, intervalToDuration } from 'date-fns';

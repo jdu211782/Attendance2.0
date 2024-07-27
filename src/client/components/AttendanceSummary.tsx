@@ -1,11 +1,12 @@
+// AttendanceSummary
+
 import React, { useState } from 'react';
-import { Box, Typography, Grid, Paper, IconButton, Tabs, Tab } from '@mui/material';
+import { Box, Typography, Grid, Paper, IconButton } from '@mui/material';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import BarChartIcon from '@mui/icons-material/BarChart';
-import MonthSelectorModal from './MonthSelectorModal'; 
-import WeeklyTimesheet from './WeeklyTimesheet'; 
+import MonthSelectorModal from './MonthSelectorModal';
+import WeeklyTimesheet from './WeeklyTimesheet';
 import { SelectChangeEvent } from '@mui/material';
+import { timesheetData } from './TimesheetData';
 
 interface AttendanceSummaryProps {
   attendanceSummary: {
@@ -42,8 +43,8 @@ const months = [
 
 const AttendanceSummary: React.FC<AttendanceSummaryProps> = ({ attendanceSummary }) => {
   const [open, setOpen] = useState(false);
-  const [selectedMonth, setSelectedMonth] = useState<number>(4); // Default to May
-  const [selectedYear, setSelectedYear] = useState<number>(2024); // Default year
+  const [selectedMonth, setSelectedMonth] = useState<number>(4);
+  const [selectedYear, setSelectedYear] = useState<number>(2024);
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -58,14 +59,7 @@ const AttendanceSummary: React.FC<AttendanceSummaryProps> = ({ attendanceSummary
   return (
     <Box sx={{ p: 3, borderRadius: 4, backgroundColor: '#ffffff', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
       <Box sx={{ display: 'flex', marginTop: -3.5, flexDirection: 'column', alignItems: 'flex-start', width: '100%' }}>
-        <Typography
-          variant="h6"
-          sx={{
-            mb: 1,
-            color: '#1c1f26',
-            alignSelf: 'flex-start',
-          }}
-        >
+        <Typography variant="h6" sx={{ mb: 1, color: '#1c1f26', alignSelf: 'flex-start' }}>
           Attendance
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between', mb: 2 }}>
@@ -126,15 +120,7 @@ const AttendanceSummary: React.FC<AttendanceSummaryProps> = ({ attendanceSummary
         onYearChange={handleYearChange}
       />
 
-      <WeeklyTimesheet
-        weekNumber={1}
-        dateRange="07 - 13 Jan"
-        timesheetData={[
-          { day: 7, weekday: 'Sun', checkIn: '08:00', checkOut: '17:00', totalHours: '9:00' },
-          { day: 8, weekday: 'Mon', checkIn: '08:00', checkOut: '17:00', totalHours: '9:00' },
-          // Добавьте данные для остальных дней
-        ]}
-      />
+      <WeeklyTimesheet timesheetData={timesheetData} />
     </Box>
   );
 };

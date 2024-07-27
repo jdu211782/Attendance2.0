@@ -1,3 +1,5 @@
+// DashboardPage.tsx
+
 import React, { useState } from 'react';
 import { Container, Box } from '@mui/material';
 import Header from '../components/Header';
@@ -26,16 +28,19 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ employeeData, onLogout })
   };
 
   return (
-    <Container maxWidth="xs" sx={{ 
-      background: '#f4f4f4',
-      minHeight: 'auto', 
-      display: 'flex', 
-      flexDirection: 'column', 
-      overflow: 'hidden', 
-      p: 2,
-      paddingBottom: '20px',
-      pt: 4, // Паддинг сверху для поднятия содержимого
-    }}>
+    <Container 
+      maxWidth="xs" 
+      sx={{ 
+        background: '#f4f4f4',
+        minHeight: '100vh', 
+        display: 'flex', 
+        flexDirection: 'column', 
+        overflow: 'hidden', 
+        p: 2,
+        paddingBottom: '20px',
+        pt: 4,
+      }}
+    >
       <Header
         onLogout={onLogout}
         employeeName={employeeData.name}

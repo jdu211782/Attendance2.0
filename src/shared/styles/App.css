@@ -1,3 +1,7 @@
+body {
+  background-color: #f4f4f4;
+}
+
 .App {
   font-family: Arial, sans-serif;
 }
@@ -101,7 +105,7 @@
 
 .container {
   min-height: 200vh;
-  background: linear-gradient(to bottom, #f4f4f4 0%, #f4f4f4 90%, #ffffff 100%);
+  background: red;
   padding-bottom: 20px;
 }
 

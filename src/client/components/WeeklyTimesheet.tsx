@@ -1,110 +1,115 @@
+// WeeklyTimesheet
+
 import React from 'react';
-import { Box, Typography, IconButton, Collapse, Grid } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { Box, Typography, Grid, MenuItem, Select, FormControl, SelectChangeEvent } from '@mui/material';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import TimelapseIcon from '@mui/icons-material/Timelapse';
+import { TimesheetDay, TimesheetWeekData, weekRanges } from './TimesheetData';
 
-// Типы данных для одного дня
-interface TimesheetDay {
-  day: number;
-  weekday: string;
-  checkIn: string;
-  checkOut: string;
-  totalHours: string;
-}
-
-// Свойства для компонента WeeklyTimesheet
 interface WeeklyTimesheetProps {
-  weekNumber: number;
-  dateRange: string;
-  timesheetData: TimesheetDay[];
+  timesheetData: TimesheetWeekData;
 }
 
-// Компонент WeeklyTimesheet
-const WeeklyTimesheet: React.FC<WeeklyTimesheetProps> = ({ weekNumber, dateRange, timesheetData }) => {
-  const [open, setOpen] = React.useState(false);
+const getTimeColor = (time: string, isCheckIn: boolean) => {
+  if (!time) return '#ff3b30'; // Отсутствие
+  const [hours, minutes] = time.split(':').map(Number);
+  if (isCheckIn) {
+    return hours < 9 || (hours === 10 && minutes === 0) ? '#00af6c' : '#ff9500';
+  } else {
+    return hours > 17 || (hours === 17 && minutes >= 30) ? '#00af6c' : '#ff9500';
+  }
+};
 
-  const handleToggle = () => {
-    setOpen(!open);
+const formatDay = (day: number) => {
+  return String(day).padStart(2, '0');
+};
+
+const WeeklyTimesheet: React.FC<WeeklyTimesheetProps> = ({ timesheetData }) => {
+  const [selectedWeek, setSelectedWeek] = React.useState(weekRanges[0]);
+
+  const handleWeekChange = (event: SelectChangeEvent<string>) => {
+    setSelectedWeek(event.target.value);
   };
 
   return (
-    <Box
-      sx={{
-        mb: 3,
-        mt: 3,
-        backgroundColor: '#ffffff',
+    <Box sx={{ mb: 3, mt: 3, backgroundColor: '#ffffff', borderRadius: 2, overflow: 'hidden', boxShadow: 1, p: 1 }}>
+      <Box sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        backgroundColor: '#f5f5f5',
         borderRadius: 2,
-        overflow: 'hidden',
-        boxShadow: 1,
         p: 1,
-        maxHeight: open ? 'auto' : '150px',
-        transition: 'max-height 0.3s ease-out',
-      }}
-    >
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          backgroundColor: '#f5f5f5',
-          borderRadius: 2,
-          p: 1,
-          cursor: 'pointer',
-          boxShadow: 1,
-        }}
-        onClick={handleToggle}
-      >
-        <Typography variant="h6" sx={{ flexGrow: 1 }}>
-          Week {weekNumber}
-        </Typography>
-        <Typography variant="body2" sx={{ color: '#666666' }}>
-          {dateRange}
-        </Typography>
-        <IconButton size="small">
-          <ExpandMoreIcon
-            sx={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}
-          />
-        </IconButton>
+        mb: 1,
+        boxShadow: 1,
+      }}>
+        <Typography variant="h6">Weeks</Typography>
+        <FormControl variant="outlined" size="small" sx={{ minWidth: 120 }}>
+          <Select
+            value={selectedWeek}
+            onChange={handleWeekChange}
+            sx={{ textAlign: 'center' }}
+            MenuProps={{
+              PaperProps: {
+                sx: {
+                  '& .MuiMenuItem-root': {
+                    display: 'flex',
+                    justifyContent: 'center',
+                  },
+                },
+              },
+            }}
+          >
+            {weekRanges.map((weekRange, index) => (
+              <MenuItem key={index} value={weekRange} sx={{ justifyContent: 'center' }}>
+                {weekRange}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
       </Box>
-      <Collapse in={open}>
-        <Grid container spacing={1} sx={{ mt: 1, maxHeight: '100px', overflowY: 'auto' }}>
-          {timesheetData.map((day, index) => (
-            <Grid item xs={12} key={index}>
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  backgroundColor: '#ffffff',
-                  borderRadius: 1,
-                  p: 1,
-                  boxShadow: 1,
-                }}
-              >
+      <Grid container spacing={1}>
+        {timesheetData[selectedWeek]?.map((day, index) => (
+          <Grid item xs={12} key={index}>
+            <Box sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              backgroundColor: '#ffffff',
+              borderRadius: 1,
+              p: 1,
+              boxShadow: 1,
+            }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '60px' }}>
                 <Typography variant="body2">
-                  {day.day} {day.weekday}
+                  {formatDay(day.day)} {day.weekday}
                 </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <AccessTimeIcon sx={{ mr: 0.5 }} />
-                  <Typography variant="body2">{day.checkIn}</Typography>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <ExitToAppIcon sx={{ mr: 0.5 }} />
-                  <Typography variant="body2">{day.checkOut}</Typography>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <TimelapseIcon sx={{ mr: 0.5 }} />
-                  <Typography variant="body2">{day.totalHours}</Typography>
-                </Box>
               </Box>
-            </Grid>
-          ))}
-        </Grid>
-      </Collapse>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <AccessTimeIcon sx={{ mr: 0.5, color: getTimeColor(day.checkIn, true) }} />
+                <Typography variant="body2" sx={{ color: getTimeColor(day.checkIn, true) }}>
+                  {day.checkIn || 'Absent'}
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <ExitToAppIcon sx={{ mr: 0.5, color: getTimeColor(day.checkOut, false) }} />
+                <Typography variant="body2" sx={{ color: getTimeColor(day.checkOut, false) }}>
+                  {day.checkOut || 'Absent'}
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <TimelapseIcon sx={{ mr: 0.5 }} />
+                <Typography variant="body2">{day.totalHours}</Typography>
+              </Box>
+            </Box>
+          </Grid>
+        ))}
+      </Grid>
     </Box>
   );
 };
 
 export default WeeklyTimesheet;
+
+
