@@ -21,6 +21,18 @@ const getTimeColor = (time: string, isCheckIn: boolean) => {
   }
 };
 
+const getTotalHoursColor = (totalHours: string) => {
+  if (!totalHours) return '#ff3b30'; // Отсутствие
+  const [hours, minutes] = totalHours.split(':').map(Number);
+  if (hours > 8 || (hours === 8 && minutes > 0)) {
+    return '#00af6c'; // Более 8 часов - зеленый
+  } else if (hours < 2 || (hours === 2 && minutes === 0)) {
+    return '#ff3b30'; // Менее 2 часов - красный
+  } else {
+    return '#ff9500'; // От 2:01 до 7:59 - оранжевый
+  }
+};
+
 const formatDay = (day: number) => {
   return String(day).padStart(2, '0');
 };
@@ -89,18 +101,20 @@ const WeeklyTimesheet: React.FC<WeeklyTimesheetProps> = ({ timesheetData }) => {
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <AccessTimeIcon sx={{ mr: 0.5, color: getTimeColor(day.checkIn, true) }} />
                 <Typography variant="body2" sx={{ color: getTimeColor(day.checkIn, true) }}>
-                  {day.checkIn || 'Absent'}
+                  {day.checkIn || '--:--'}
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <ExitToAppIcon sx={{ mr: 0.5, color: getTimeColor(day.checkOut, false) }} />
                 <Typography variant="body2" sx={{ color: getTimeColor(day.checkOut, false) }}>
-                  {day.checkOut || 'Absent'}
+                  {day.checkOut || '--:--'}
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <TimelapseIcon sx={{ mr: 0.5 }} />
-                <Typography variant="body2">{day.totalHours}</Typography>
+                <TimelapseIcon sx={{ mr: 0.5, color: getTotalHoursColor(day.totalHours) }} />
+                <Typography variant="body2" sx={{ color: getTotalHoursColor(day.totalHours) }}>
+                  {day.totalHours || '--:--'}
+                </Typography>
               </Box>
             </Box>
           </Grid>
@@ -111,5 +125,7 @@ const WeeklyTimesheet: React.FC<WeeklyTimesheetProps> = ({ timesheetData }) => {
 };
 
 export default WeeklyTimesheet;
+
+
 
 
