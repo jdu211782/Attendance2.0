@@ -1,69 +1,70 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Box } from '@mui/material';
-import Header from '../components/Header'; // Импорт компонента Header
-import MainContent from '../components/MainContent'; // Импорт компонента MainContent
-import '@fontsource/poppins/500.css'; // Импорт шрифта Poppins
-import axiosInstance from "../.././utils/libs/axios"
+import Header from '../components/Header';
+import MainContent from '../components/MainContent';
+import '@fontsource/poppins/500.css';
+import axiosInstance from "../../utils/libs/axios";
 
 interface DashboardPageProps {
-  employeeData: any;  // Данные сотрудника, уточните тип данных
-  onLogout: () => void; // Функция для выхода из системы
+  employeeData: {
+    id: number;
+    name: string;
+    attendanceSummary: {
+      [key: string]: number;
+    };
+  };
+  onLogout: () => void;
 }
 
 const DashboardPage: React.FC<DashboardPageProps> = ({ employeeData, onLogout }) => {
-  const [tabIndex, setTabIndex] = useState<number>(0); // Индекс выбранной вкладки
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null); // Элемент для меню
+  const [tabIndex, setTabIndex] = useState<number>(0);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-  // Обработчик изменения вкладки
   const handleTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabIndex(newValue);
   };
 
-  // Обработчик открытия меню
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
-  // Обработчик закрытия меню
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
-  useEffect(()=>{
- 
-    const getData=async()=>{
+
+  useEffect(() => {
+    const getData = async () => {
       try {
-        const {data}=await axiosInstance.get("/posts")
-        if(data){
+        const { data } = await axiosInstance.get("/posts");
+        if (data) {
           console.log(data);
-          
         }
       } catch (error) {
         console.log(error);
       }
-    }
-    getData()
-    const postMethod=async()=>{
-      const info={name:"Alimardon",password:"1qazxsw"}
+    };
+    getData();
+
+    const postMethod = async () => {
+      const info = { name: "Alimardon", password: "1qazxsw" };
       try {
-        
-        const {data}=await axiosInstance.put("http://localhost:3000/users/2",info)
-        if(data){
+        const { data } = await axiosInstance.put("http://localhost:3000/users/2", info);
+        if (data) {
           console.log(data);
-          
         }
       } catch (error) {
         console.log(error);
       }
-    }
-    postMethod()
-  },[])
+    };
+    postMethod();
+  }, []);
 
   return (
     <Container 
       maxWidth="xs" 
       sx={{ 
-        background: '#f4f4f4', // Цвет фона контейнера
-        minHeight: '100vh', // Минимальная высота контейнера
+        background: '#f4f4f4',
+        minHeight: '100vh',
         display: 'flex', 
         flexDirection: 'column', 
         overflow: 'hidden', 
@@ -72,7 +73,6 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ employeeData, onLogout })
         pt: 4,
       }}
     >
-      {/* Компонент Header с функциями для выхода и отображения имени сотрудника */}
       <Header
         onLogout={onLogout}
         employeeName={employeeData.name}
@@ -81,11 +81,11 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ employeeData, onLogout })
         handleMenuClose={handleMenuClose}
       />
       <Box sx={{ flexGrow: 1 }}>
-        {/* Компонент MainContent с текущей вкладкой и данными по посещаемости */}
         <MainContent 
           tabIndex={tabIndex} 
           handleTabChange={handleTabChange}
-          attendanceSummary={employeeData.attendanceSummary} 
+          attendanceSummary={employeeData.attendanceSummary}
+          userId={employeeData.id}
         />
       </Box>
     </Container>

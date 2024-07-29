@@ -4,82 +4,117 @@ import { format, intervalToDuration } from 'date-fns';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import AttendanceSummary from './AttendanceSummary';
+import { sendCheckInData, sendCheckOutData } from '../../utils/libs/axios';
 
 interface MainContentProps {
-  tabIndex: number; // Текущий индекс активной вкладки
-  handleTabChange: (event: React.ChangeEvent<{}>, newValue: number) => void; // Обработчик смены вкладок
+  tabIndex: number;
+  handleTabChange: (event: React.ChangeEvent<{}>, newValue: number) => void;
   attendanceSummary: {
-    [key: string]: number; // Данные резюме посещаемости
+    [key: string]: number;
   };
+  userId: number;
 }
 
-const MainContent: React.FC<MainContentProps> = ({ tabIndex, handleTabChange, attendanceSummary }) => {
-  const [checkInTime, setCheckInTime] = useState<Date | null>(null); // Время входа
-  const [checkOutTime, setCheckOutTime] = useState<Date | null>(null); // Время выхода
-  const [totalHours, setTotalHours] = useState<string>('--:--'); // Всего часов
-  const [message, setMessage] = useState<string | null>(null); // Сообщение для пользователя
-  const [currentTime, setCurrentTime] = useState<string>(format(new Date(), 'HH:mm:ss')); // Текущее время
+const MainContent: React.FC<MainContentProps> = ({ tabIndex, handleTabChange, attendanceSummary, userId }) => {
+  const [checkInTime, setCheckInTime] = useState<Date | null>(null);
+  const [checkOutTime, setCheckOutTime] = useState<Date | null>(null);
+  const [totalHours, setTotalHours] = useState<string>('--:--');
+  const [message, setMessage] = useState<string | null>(null);
+  const [currentTime, setCurrentTime] = useState<string>(format(new Date(), 'HH:mm:ss'));
 
-  // Обновление текущего времени каждую секунду
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTime(format(new Date(), 'HH:mm:ss'));
     }, 1000);
-
-    // Очистка интервала при размонтировании компонента
     return () => clearInterval(interval);
   }, []);
 
-  // Обработка нажатия кнопки "Come"
-  const handleComeClick = () => {
+  const getCurrentPosition = (): Promise<GeolocationPosition> => {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject(new Error('Geolocation is not supported by your browser'));
+      } else {
+        navigator.geolocation.getCurrentPosition(resolve, reject);
+      }
+    });
+  };
+
+  const handleComeClick = async () => {
     const now = new Date();
     setCheckInTime(now);
     setMessage(`Welcome! You checked in at ${format(now, 'HH:mm')}`);
-    setCheckOutTime(null); // При входе время выхода сбрасывается
-    setTotalHours('--:--'); // При входе общее время также сбрасывается
+    setCheckOutTime(null);
+    setTotalHours('--:--');
+
+    try {
+      const position = await getCurrentPosition();
+      
+      await sendCheckInData({
+        userId,
+        timestamp: now.toISOString(),
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude
+      });
+      
+      setMessage(prevMessage => `${prevMessage}. Data sent successfully!`);
+    } catch (error) {
+      console.error('Error sending check-in data:', error);
+      setMessage(prevMessage => `${prevMessage}. Error sending data.`);
+    }
   };
 
-  // Обработка нажатия кнопки "Leave"
-  const handleLeaveClick = () => {
+  const handleLeaveClick = async () => {
     if (checkInTime) {
       const now = new Date();
       setCheckOutTime(now);
       setMessage(`Goodbye! You checked out at ${format(now, 'HH:mm')}`);
-      // Вычисление продолжительности работы
       const duration = intervalToDuration({ start: checkInTime, end: now });
       setTotalHours(`${duration.hours || 0}h ${duration.minutes || 0}m`);
+
+      try {
+        const position = await getCurrentPosition();
+        
+        await sendCheckOutData({
+          userId,
+          timestamp: now.toISOString(),
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude
+        });
+        
+        setMessage(prevMessage => `${prevMessage}. Check-out data sent successfully!`);
+      } catch (error) {
+        console.error('Error sending check-out data:', error);
+        setMessage(prevMessage => `${prevMessage}. Error sending check-out data.`);
+      }
     } else {
       setMessage('You need to check in first!');
     }
   };
 
   return (
-    <Box
-      sx={{
-        flexGrow: 1,
-        bgcolor: 'white',
-        borderRadius: 4,
-        boxShadow: 3,
-        p: 3,
-        overflow: 'hidden',
-        textAlign: 'center',
-        position: 'relative',
-        padding: 1,
-      }}
-    >
-      {/* Вкладки для переключения между временем и резюме */}
+    <Box sx={{
+      flexGrow: 1,
+      bgcolor: 'white',
+      borderRadius: 4,
+      boxShadow: 3,
+      p: 3,
+      overflow: 'hidden',
+      textAlign: 'center',
+      position: 'relative',
+      padding: 1,
+    }}>
       <Tabs
         value={tabIndex}
         onChange={handleTabChange}
         centered
         sx={{
           mb: 2,
-          width: '100%', // Убедитесь, что вкладки занимают всю ширину
+          width: '100%',
           '.MuiTabs-flexContainer': {
-            width: '100%', // Убедитесь, что контейнер вкладок занимает всю ширину
+            width: '100%',
           },
           '.MuiTab-root': {
-            flexGrow: 1, // Позволяет вкладкам расширяться на всю ширину
+            flexGrow: 1,
             minWidth: 120,
             minHeight: 50,
             fontSize: '1rem',
@@ -93,17 +128,10 @@ const MainContent: React.FC<MainContentProps> = ({ tabIndex, handleTabChange, at
           },
         }}
       >
-        <Tab
-          icon={<AccessTimeIcon sx={{ fontSize: 32 }} />}
-          aria-label="time"
-        />
-        <Tab
-          icon={<BarChartIcon sx={{ fontSize: 32 }} />}
-          aria-label="summary"
-        />
+        <Tab icon={<AccessTimeIcon sx={{ fontSize: 32 }} />} aria-label="time" />
+        <Tab icon={<BarChartIcon sx={{ fontSize: 32 }} />} aria-label="summary" />
       </Tabs>
 
-      {/* Контент для вкладки времени */}
       {tabIndex === 0 && (
         <>
           <Typography variant="h3" sx={{ fontWeight: 'bold', color: '#1c1f26' }}>
@@ -176,7 +204,6 @@ const MainContent: React.FC<MainContentProps> = ({ tabIndex, handleTabChange, at
         </>
       )}
 
-      {/* Контент для вкладки резюме */}
       {tabIndex === 1 && <AttendanceSummary attendanceSummary={attendanceSummary} />}
     </Box>
   );
