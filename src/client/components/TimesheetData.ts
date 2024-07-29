@@ -12,7 +12,7 @@ export interface TimesheetDay {
     [key: string]: TimesheetDay[];
   }
   
-  export const weekRanges = ['22-26', '29-02', '05-09', '12-16', '19-23'];
+  export const weekRanges = ['22-26', '29-02', '05-09', '12-16'];
   
   export const timesheetData: TimesheetWeekData = {
     '22-26': [
@@ -50,14 +50,5 @@ export interface TimesheetDay {
       { day: 16, weekday: 'Fri', checkIn: '08:00', checkOut: '17:00', totalHours: '09:00' },
       { day: 17, weekday: 'Sat', checkIn: '', checkOut: '', totalHours: '' },
       { day: 18, weekday: 'Sun', checkIn: '', checkOut: '', totalHours: '' },
-    ],
-    '19-23': [
-      { day: 19, weekday: 'Mon', checkIn: '08:00', checkOut: '17:00', totalHours: '09:00' },
-      { day: 20, weekday: 'Tue', checkIn: '08:00', checkOut: '17:00', totalHours: '09:00' },
-      { day: 21, weekday: 'Wed', checkIn: '08:00', checkOut: '17:00', totalHours: '09:00' },
-      { day: 22, weekday: 'Thu', checkIn: '08:00', checkOut: '17:00', totalHours: '09:00' },
-      { day: 23, weekday: 'Fri', checkIn: '08:00', checkOut: '17:00', totalHours: '09:00' },
-      { day: 24, weekday: 'Sat', checkIn: '', checkOut: '', totalHours: '' },
-      { day: 25, weekday: 'Sun', checkIn: '', checkOut: '', totalHours: '' },
     ],
   };
