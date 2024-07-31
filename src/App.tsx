@@ -1,25 +1,10 @@
+// App.tsx
+
 import React, { useState } from 'react';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './client/pages/LoginPage';
 import DashboardPage from './client/pages/DashboardPage';
-import AdminDashboard from './admin/pages/AdminDashboard';
-import { Employee } from './employees';
-
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#105f82',
-    },
-    secondary: {
-      main: '#6c757d',
-    },
-  },
-  typography: {
-    fontFamily: 'Poppins, Roboto, sans-serif',
-  },
-});
+import { Employee } from './employees'; // Путь может отличаться
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -34,19 +19,23 @@ function App() {
   const handleLogout = () => {
     setIsLoggedIn(false);
     setEmployeeData(null);
+    localStorage.removeItem('token');
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<LoginPage onLoginSuccess={handleLoginSuccess} />} />
-          <Route path="/" element={isLoggedIn ? <DashboardPage employeeData={employeeData!} onLogout={handleLogout} /> : <Navigate to="/login" />} />
-          <Route path="/admin" element={isLoggedIn && employeeData?.isAdmin ? <AdminDashboard /> : <Navigate to="/" />} />
-        </Routes>
-      </BrowserRouter>
-    </ThemeProvider>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<LoginPage onLoginSuccess={handleLoginSuccess} />} />
+        <Route 
+          path="/" 
+          element={
+            isLoggedIn && employeeData 
+              ? <DashboardPage employeeData={employeeData} onLogout={handleLogout} />
+              : <Navigate to="/login" />
+          } 
+        />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

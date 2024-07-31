@@ -1,38 +1,19 @@
 import axios from "axios";
 
 const axiosInstance = axios.create({
-    baseURL: "https://jsonplaceholder.typicode.com", // Замените на ваш реальный API URL
+    baseURL: "http://localhost:8080/api/v1/sign-in", // Замените на ваш реальный API URL
     withCredentials: false,
 });
 
-const sendCheckInData = async (data: {
-    userId: number;
-    timestamp: string;
-    latitude: number;
-    longitude: number;
-}) => {
-    try {
-        const response = await axiosInstance.post('/check-in', data);
-        return response.data;
-    } catch (error) {
-        console.error('Error sending check-in data:', error);
-        throw error;
+// Добавляем перехватчик для включения токена в заголовок
+axiosInstance.interceptors.request.use((config) => {
+    const token = localStorage.getItem('token'); // Предполагается, что токен хранится в localStorage после входа
+    if (token) {
+        config.headers['Authorization'] = `Bearer ${token}`;
     }
-};
+    return config;
+}, (error) => {
+    return Promise.reject(error);
+});
 
-const sendCheckOutData = async (data: {
-    userId: number;
-    timestamp: string;
-    latitude: number;
-    longitude: number;
-}) => {
-    try {
-        const response = await axiosInstance.post('/check-out', data);
-        return response.data;
-    } catch (error) {
-        console.error('Error sending check-out data:', error);
-        throw error;
-    }
-};
-
-export { axiosInstance as default, sendCheckInData, sendCheckOutData };
+export default axiosInstance;

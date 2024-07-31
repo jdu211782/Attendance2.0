@@ -1,8 +1,8 @@
-// LoginPage.tsx
+// pages/LoginPage.tsx
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Employee, employees } from '../../employees';
+import { Employee, employees } from '../../employees'; // Путь может отличаться
 import {
   Box,
   TextField,
@@ -25,11 +25,12 @@ function LoginPage({ onLoginSuccess }: LoginPageProps) {
 
   const handleLogin = () => {
     const employee = employees.find(
-      (emp) => emp.username === username && emp.password === password
+      emp => emp.username === username && emp.password === password
     );
     if (employee) {
+      localStorage.setItem('token', 'fake-jwt-token'); // Симуляция токена
       onLoginSuccess(employee);
-      navigate('/'); // Перенаправление после входа
+      navigate('/');
     } else {
       setError('Неверное имя пользователя или пароль');
     }
@@ -37,7 +38,7 @@ function LoginPage({ onLoginSuccess }: LoginPageProps) {
 
   return (
     <Container
-      maxWidth="sm" // Увеличиваем ширину контейнера
+      maxWidth="sm"
       sx={{
         minHeight: '100vh',
         display: 'flex',
@@ -50,23 +51,23 @@ function LoginPage({ onLoginSuccess }: LoginPageProps) {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          padding: 4, // Увеличиваем padding
+          padding: 4,
           borderRadius: 4,
           boxShadow: 3,
           backgroundColor: '#f0f8ff',
-          width: '100%', // Ширина блока должна быть 100% от ширины контейнера
-          maxWidth: 400, // Ограничение максимальной ширины для предотвращения слишком большой растяжки
+          width: '100%',
+          maxWidth: 400,
         }}
       >
         <Typography component="h1" variant="h5">
-          Log In
+          Вход
         </Typography>
         <TextField
           margin="normal"
           required
           fullWidth
           id="username"
-          label="Username"
+          label="Имя пользователя"
           name="username"
           autoComplete="username"
           autoFocus
@@ -78,7 +79,7 @@ function LoginPage({ onLoginSuccess }: LoginPageProps) {
           required
           fullWidth
           name="password"
-          label="Password"
+          label="Пароль"
           type="password"
           id="password"
           autoComplete="current-password"
@@ -104,7 +105,7 @@ function LoginPage({ onLoginSuccess }: LoginPageProps) {
           }}
           onClick={handleLogin}
         >
-          Continue
+          Продолжить
         </Button>
       </Box>
     </Container>

@@ -1,18 +1,14 @@
-import React, { useState, useEffect } from 'react';
+// pages/DashboardPage.tsx
+
+import React, { useState } from 'react';
 import { Container, Box } from '@mui/material';
 import Header from '../components/Header';
 import MainContent from '../components/MainContent';
 import '@fontsource/poppins/500.css';
-import axiosInstance from "../../utils/libs/axios";
+import { Employee } from '../../employees'; // Путь может отличаться
 
 interface DashboardPageProps {
-  employeeData: {
-    id: number;
-    name: string;
-    attendanceSummary: {
-      [key: string]: number;
-    };
-  };
+  employeeData: Employee;
   onLogout: () => void;
 }
 
@@ -31,33 +27,6 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ employeeData, onLogout })
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
-
-  useEffect(() => {
-    const getData = async () => {
-      try {
-        const { data } = await axiosInstance.get("/posts");
-        if (data) {
-          console.log(data);
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    getData();
-
-    const postMethod = async () => {
-      const info = { name: "Alimardon", password: "1qazxsw" };
-      try {
-        const { data } = await axiosInstance.put("http://localhost:3000/users/2", info);
-        if (data) {
-          console.log(data);
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    postMethod();
-  }, []);
 
   return (
     <Container 
@@ -86,6 +55,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ employeeData, onLogout })
           handleTabChange={handleTabChange}
           attendanceSummary={employeeData.attendanceSummary}
           userId={employeeData.id}
+          username={employeeData.username}
         />
       </Box>
     </Container>

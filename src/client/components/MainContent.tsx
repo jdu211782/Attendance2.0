@@ -1,10 +1,11 @@
+// components/MainContent.tsx
+
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button, Divider, Tabs, Tab } from '@mui/material';
 import { format, intervalToDuration } from 'date-fns';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import AttendanceSummary from './AttendanceSummary';
-import { sendCheckInData, sendCheckOutData } from '../../utils/libs/axios';
 
 interface MainContentProps {
   tabIndex: number;
@@ -13,9 +14,10 @@ interface MainContentProps {
     [key: string]: number;
   };
   userId: number;
+  username: string;
 }
 
-const MainContent: React.FC<MainContentProps> = ({ tabIndex, handleTabChange, attendanceSummary, userId }) => {
+const MainContent: React.FC<MainContentProps> = ({ tabIndex, handleTabChange, attendanceSummary, userId, username }) => {
   const [checkInTime, setCheckInTime] = useState<Date | null>(null);
   const [checkOutTime, setCheckOutTime] = useState<Date | null>(null);
   const [totalHours, setTotalHours] = useState<string>('--:--');
@@ -32,62 +34,77 @@ const MainContent: React.FC<MainContentProps> = ({ tabIndex, handleTabChange, at
   const getCurrentPosition = (): Promise<GeolocationPosition> => {
     return new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
-        reject(new Error('Geolocation is not supported by your browser'));
+        reject(new Error('Геолокация не поддерживается вашим браузером'));
       } else {
-        navigator.geolocation.getCurrentPosition(resolve, reject);
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0
+        });
       }
     });
   };
 
-  const handleComeClick = async () => {
-    const now = new Date();
-    setCheckInTime(now);
-    setMessage(`Welcome! You checked in at ${format(now, 'HH:mm')}`);
-    setCheckOutTime(null);
-    setTotalHours('--:--');
-
+  const sendAttendanceData = async (type: 'checkIn' | 'checkOut') => {
     try {
       const position = await getCurrentPosition();
-      
-      await sendCheckInData({
+      const data = {
         userId,
-        timestamp: now.toISOString(),
         latitude: position.coords.latitude,
-        longitude: position.coords.longitude
-      });
-      
-      setMessage(prevMessage => `${prevMessage}. Data sent successfully!`);
+        longitude: position.coords.longitude,
+        type
+      };
+  
+      // Здесь должен быть код для отправки данных на сервер
+      // Пока что просто логируем данные
+      console.log(`Данные ${type} готовы к отправке:`, data);
+  
+      return new Date();
     } catch (error) {
-      console.error('Error sending check-in data:', error);
-      setMessage(prevMessage => `${prevMessage}. Error sending data.`);
+      if (error instanceof GeolocationPositionError) {
+        switch(error.code) {
+          case error.PERMISSION_DENIED:
+            console.error("Пользователь отказал в доступе к геолокации");
+            break;
+          case error.POSITION_UNAVAILABLE:
+            console.error("Информация о местоположении недоступна");
+            break;
+          case error.TIMEOUT:
+            console.error("Истекло время ожидания запроса на получение местоположения пользователя");
+            break;
+        }
+      }
+      throw error;
+    }
+  };
+
+  const handleComeClick = async () => {
+    try {
+      const checkInTime = await sendAttendanceData('checkIn');
+      setCheckInTime(checkInTime);
+      setMessage(`Добро пожаловать! Вы отметились в ${format(checkInTime, 'HH:mm')}`);
+      setCheckOutTime(null);
+      setTotalHours('--:--');
+    } catch (error) {
+      console.error('Ошибка при отметке прихода:', error);
+      setMessage('Ошибка при отметке прихода. Пожалуйста, проверьте разрешения на геолокацию и попробуйте снова.');
     }
   };
 
   const handleLeaveClick = async () => {
     if (checkInTime) {
-      const now = new Date();
-      setCheckOutTime(now);
-      setMessage(`Goodbye! You checked out at ${format(now, 'HH:mm')}`);
-      const duration = intervalToDuration({ start: checkInTime, end: now });
-      setTotalHours(`${duration.hours || 0}h ${duration.minutes || 0}m`);
-
       try {
-        const position = await getCurrentPosition();
-        
-        await sendCheckOutData({
-          userId,
-          timestamp: now.toISOString(),
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude
-        });
-        
-        setMessage(prevMessage => `${prevMessage}. Check-out data sent successfully!`);
+        const checkOutTime = await sendAttendanceData('checkOut');
+        setCheckOutTime(checkOutTime);
+        setMessage(`До свидания! Вы отметились в ${format(checkOutTime, 'HH:mm')}`);
+        const duration = intervalToDuration({ start: checkInTime, end: checkOutTime });
+        setTotalHours(`${duration.hours || 0}ч ${duration.minutes || 0}м`);
       } catch (error) {
-        console.error('Error sending check-out data:', error);
-        setMessage(prevMessage => `${prevMessage}. Error sending check-out data.`);
+        console.error('Ошибка при отметке ухода:', error);
+        setMessage('Ошибка при отметке ухода. Пожалуйста, проверьте разрешения на геолокацию и попробуйте снова.');
       }
     } else {
-      setMessage('You need to check in first!');
+      setMessage('Сначала нужно отметить приход!');
     }
   };
 
