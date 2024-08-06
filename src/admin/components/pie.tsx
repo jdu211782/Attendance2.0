@@ -1,45 +1,41 @@
-import React from 'react';
-import { PieChart, pieArcLabelClasses } from '@mui/x-charts/PieChart';
-
-interface PieChartData {
-  label: string;
-  value: number;
-  color: string;
+import * as React from 'react';
+import { PieChart } from '@mui/x-charts/PieChart';
+import { useDrawingArea } from '@mui/x-charts/hooks';
+import { styled } from '@mui/material/styles';
+interface PieCenterLabelProps {
+  children: React.ReactNode;
 }
 
-const data: PieChartData[] = [
-  { label: 'Group A', value: 70, color: '#0088FE' },
-  { label: 'Group B', value: 20, color: '#00C49F' },
-  { label: 'Group C', value: 10, color: '#FFBB28' },
+const data = [
+  { value: 88, label: '出席' },
+  { value: 12, label: '欠席' },
 ];
 
-const TOTAL = data.reduce((a, b) => a + b.value, 0);
-
-const getArcLabel = (params: any) => {
-  const percent = params.value / TOTAL;
-  return `${(percent * 100).toFixed(0)}%`;
+const size = {
+  width: 300,
+  height: 300,
 };
 
-function PieChartWithCustomizedLabel() {
+const StyledText = styled('text')(({ theme }) => ({
+  fill: theme.palette.text.primary,
+  textAnchor: 'middle',
+  dominantBaseline: 'central',
+  fontSize: 30,
+}));
+
+function PieCenterLabel({ children } : PieCenterLabelProps) {
+  const { width, height, left, top } = useDrawingArea();
   return (
-    <PieChart
-      series={[
-        {
-          outerRadius: 120,
-          data,
-          arcLabel: getArcLabel,
-        },
-      ]}
-      sx={{
-        [`& .${pieArcLabelClasses.root}`]: {
-          fill: 'white',
-          fontSize: 14,
-        },
-      }}
-      width={300}
-      height={300}
-    />
+    <StyledText x={left + width / 2} y={top + height / 2}>
+      {children}
+    </StyledText>
   );
 }
 
-export default PieChartWithCustomizedLabel;
+export default function PieChartWithCenterLabel() {
+  return (
+    <PieChart series={[{ data, innerRadius: 80 }]} {...size}>
+      <PieCenterLabel>{data[0].value}%</PieCenterLabel>
+    </PieChart>
+  );
+}
