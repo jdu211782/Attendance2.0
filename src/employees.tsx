@@ -44,7 +44,7 @@ export const employees: Employee[] = [
     password: 'dog123',
     name: 'Dog',
     photoUrl: 'images/kotek.png',
-    isAdmin: true,
+    isAdmin: false,
     checkInTime: new Date(),  
     checkOutTime: null, 
     location: 'office',      
