@@ -110,7 +110,7 @@ const AttendanceSummary: React.FC<AttendanceSummaryProps> = ({ attendanceSummary
                   backgroundColor: `${statusColors[key as keyof typeof statusColors].lineColor}`,
                   borderRadius: '10px 10px 0 0',
                 },
-              }}
+              }} 
             >
               <Typography variant="body1" sx={{ color: '#1c1f26', fontSize: '1.2rem' }}>
                 {String(value)}
