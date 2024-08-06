@@ -15,7 +15,7 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ employeeName, onLogout, anchorEl, handleMenuOpen, handleMenuClose }) => {
   return (
     <Box sx={{
-      bgcolor: '#105f82', color: 'white', p: 2, display: 'flex',
+      bgcolor: '#111111', color: 'white', p: 2, display: 'flex',
       alignItems: 'center', justifyContent: 'space-between', mb: 2,
       position: 'sticky',
       top: 0,
@@ -35,12 +35,14 @@ const Header: React.FC<HeaderProps> = ({ employeeName, onLogout, anchorEl, handl
           onClose={handleMenuClose}
           PaperProps={{
             sx: {
+              pt: 0,
               mt: 1,
-              bgcolor: '#ffffff',
+              bgcolor: '#f4f4f4',
               borderRadius: 2,
               boxShadow: 3,
               minWidth: 120,
               '& .MuiMenuItem-root': {
+                mt: 0,
                 color: '#333333',
                 bgcolor: '#f4f4f4',
                 '&:hover': {

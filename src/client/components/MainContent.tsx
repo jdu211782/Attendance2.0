@@ -1,11 +1,13 @@
 // components/MainContent.tsx
 
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button, Divider, Tabs, Tab } from '@mui/material';
+import { Box, Typography, Button, Divider } from '@mui/material';
 import { format, intervalToDuration } from 'date-fns';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import BarChartIcon from '@mui/icons-material/BarChart';
 import AttendanceSummary from './AttendanceSummary';
+import TabsComponent from './TabsComponent';
+import AttendanceTable from "./Table/AttendanceTable";
+import { Column } from "./Table/types";
+import axiosInstance from '../../utils/libs/axios';
 
 interface MainContentProps {
   tabIndex: number;
@@ -15,9 +17,11 @@ interface MainContentProps {
   };
   userId: number;
   username: string;
+  tableData: any[]; // Добавлено
+  tableColumns: Column[]; // Добавлено
 }
 
-const MainContent: React.FC<MainContentProps> = ({ tabIndex, handleTabChange, attendanceSummary, userId, username }) => {
+const MainContent: React.FC<MainContentProps> = ({ tabIndex, handleTabChange, attendanceSummary, userId, username, tableData, tableColumns }) => {
   const [checkInTime, setCheckInTime] = useState<Date | null>(null);
   const [checkOutTime, setCheckOutTime] = useState<Date | null>(null);
   const [totalHours, setTotalHours] = useState<string>('--:--');
@@ -54,11 +58,12 @@ const MainContent: React.FC<MainContentProps> = ({ tabIndex, handleTabChange, at
         longitude: position.coords.longitude,
         type
       };
-  
-      // Здесь должен быть код для отправки данных на сервер
-      // Пока что просто логируем данные
-      console.log(`Данные ${type} готовы к отправке:`, data);
-  
+
+      const apiUrl = 'http://192.168.1.100:8080/api/v1';
+
+      const response = await axiosInstance.post(apiUrl, data);
+
+      console.log(`Данные ${type} успешно отправлены:`, response.data);
       return new Date();
     } catch (error) {
       if (error instanceof GeolocationPositionError) {
@@ -120,34 +125,7 @@ const MainContent: React.FC<MainContentProps> = ({ tabIndex, handleTabChange, at
       position: 'relative',
       padding: 1,
     }}>
-      <Tabs
-        value={tabIndex}
-        onChange={handleTabChange}
-        centered
-        sx={{
-          mb: 2,
-          width: '100%',
-          '.MuiTabs-flexContainer': {
-            width: '100%',
-          },
-          '.MuiTab-root': {
-            flexGrow: 1,
-            minWidth: 120,
-            minHeight: 50,
-            fontSize: '1rem',
-            transition: 'background-color 0.3s ease, transform 0.3s ease',
-            '&:hover': {
-              transform: 'scale(1.05)',
-            },
-            '&.Mui-selected': {
-              fontWeight: 'bold',
-            },
-          },
-        }}
-      >
-        <Tab icon={<AccessTimeIcon sx={{ fontSize: 32 }} />} aria-label="time" />
-        <Tab icon={<BarChartIcon sx={{ fontSize: 32 }} />} aria-label="summary" />
-      </Tabs>
+      <TabsComponent tabIndex={tabIndex} handleTabChange={handleTabChange} />
 
       {tabIndex === 0 && (
         <>
@@ -222,6 +200,17 @@ const MainContent: React.FC<MainContentProps> = ({ tabIndex, handleTabChange, at
       )}
 
       {tabIndex === 1 && <AttendanceSummary attendanceSummary={attendanceSummary} />}
+
+      {tabIndex === 2 && (
+        <Box sx={{ overflowX: 'auto' }}>
+          <AttendanceTable 
+            initialData={tableData} 
+            columns={tableColumns}
+            tableTitle=" "
+            showCalendar={false}
+          />
+        </Box>
+      )}
     </Box>
   );
 };

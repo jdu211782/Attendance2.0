@@ -67,14 +67,14 @@ const AttendanceSummary: React.FC<AttendanceSummaryProps> = ({ attendanceSummary
     <Box sx={{ p: 3, borderRadius: 4, backgroundColor: '#ffffff', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
       {/* Заголовок и кнопка для выбора месяца */}
       <Box sx={{ display: 'flex', marginTop: -3.5, flexDirection: 'column', alignItems: 'flex-start', width: '100%' }}>
-        <Typography variant="h6" sx={{ mt: 1, color: '#1c1f26', alignSelf: 'flex-start', fontSize: '15px' }}>
-          Attendance
+        <Typography variant="h6" sx={{ mt: 1, color: '#111111', alignSelf: 'flex-start', fontSize: '15px' }}>
+          
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between', mb: 0 }}>
-          <Typography variant="h6" sx={{ color: '#1c1f26', fontSize: '22px' }}>
+          <Typography variant="h6" sx={{ color: '#111111', fontSize: '22px', fontWeight: 'medium' }}>
             {months[selectedMonth]} {selectedYear}
           </Typography>
-          <IconButton onClick={handleOpen} sx={{ color: '#105f82' }}>
+          <IconButton onClick={handleOpen} sx={{ color: '#111111' }}>
             <CalendarTodayIcon />
           </IconButton>
         </Box>
@@ -90,6 +90,8 @@ const AttendanceSummary: React.FC<AttendanceSummaryProps> = ({ attendanceSummary
                 height: 70,
                 p: 2,
                 textAlign: 'left',
+                borderTop: '5',
+                borderColor: 'black',
                 background: `${statusColors[key as keyof typeof statusColors].background}`,
                 position: 'relative',
                 borderRadius: '5px 5px 10px 10px',
