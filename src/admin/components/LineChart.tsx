@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useLayoutEffect } from "react"; // Import useLayoutEffect and useRef
 import { LineChart } from "@mui/x-charts/LineChart";
 import {
   Box,
@@ -47,6 +47,15 @@ function LineChartComponent() {
     setFilter(newFilter);
   };
 
+  const chartRef = useRef<HTMLDivElement | null>(null);
+  const [chartWidth, setChartWidth] = useState<number>(600); 
+
+  useLayoutEffect(() => {
+    if (chartRef.current) {
+      setChartWidth(chartRef.current.offsetWidth); // Get actual width on mount and resize
+    }
+  }, []);
+
   return (
     <Box sx={{ backgroundColor: "#fff", padding: 2 }}>
       <Box sx={{display: 'flex', justifyContent: "space-between"}}>
@@ -92,7 +101,7 @@ function LineChartComponent() {
         sx={{
           backgroundColor: "#fff",
         }}
-        width={650}
+        width={chartWidth}
         height={235}
       />
     </Box>

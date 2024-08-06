@@ -65,24 +65,9 @@ function App() {
             />
             <Route
               path="/admin/*"
-              element={
-                isLoggedIn && employeeData?.isAdmin ? (
-                  <Grid container>
-                    <div className="Slayout">
-                      <div className="Ssidebar">
-                        <SideMenu />
-                      </div>
-                    </div>
-                    <Grid item xs={10}>
-                      {" "}
-                      {/* Основной контент */}
+              element={ 
                       <AdminDashboard />
-                    </Grid>
-                  </Grid>
-                ) : (
-                  <Navigate to="/" />
-                )
-              }
+                    }
             />
             <Route path="/qrreader" element={<QrReader />} />
           </Routes>
