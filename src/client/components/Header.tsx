@@ -26,9 +26,18 @@ const Header: React.FC<HeaderProps> = ({ employeeName, onLogout, anchorEl, handl
         Hey {employeeName}!
       </Typography>
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
-        <IconButton edge="end" color="inherit" aria-label="menu" onClick={handleMenuOpen}>
-          <MenuIcon />
-        </IconButton>
+      <IconButton 
+  edge="end" 
+  aria-label="menu" 
+  onClick={handleMenuOpen}
+  sx={{ 
+    '& .MuiSvgIcon-root': {
+      color: '#ffffff'
+    }
+  }}
+>
+  <MenuIcon />
+</IconButton>
         <Menu
           anchorEl={anchorEl}
           open={Boolean(anchorEl)}
