@@ -1,8 +1,8 @@
-// pages/LoginPage.tsx
+// src/client/pages/LoginPage.tsx
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Employee, employees } from '../../employees'; // Путь может отличаться
+import { Employee, employees } from '../../employees'; // Обновленный путь
 import {
   Box,
   TextField,
@@ -30,7 +30,11 @@ function LoginPage({ onLoginSuccess }: LoginPageProps) {
     if (employee) {
       localStorage.setItem('token', 'fake-jwt-token'); // Симуляция токена
       onLoginSuccess(employee);
-      navigate('/');
+      if (employee.isAdmin) {
+        navigate('/admin'); // Перенаправление для админа
+      } else {
+        navigate('/'); // Перенаправление для обычного пользователя
+      }
     } else {
       setError('Неверное имя пользователя или пароль');
     }
