@@ -28,6 +28,7 @@ export default function SimpleBarChart() {
           data,
           label: "department attendance",
           id: "pvId",
+          color: "#8197ea"
         },
       ]}
       xAxis={[{ data: xLabels, scaleType: "band" }]}

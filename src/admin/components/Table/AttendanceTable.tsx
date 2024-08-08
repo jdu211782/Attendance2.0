@@ -13,14 +13,14 @@ import {
   Button,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday"; 
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 
 import { TableData, Column, FilterState } from "./types";
 import AttendanceTableHead from "./AttendanceTableHead";
 import AttendanceTableBody from "./AttendanceTableBody";
 import CalendarModal from "./CalendarModal";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";  
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 import dayjs from "dayjs";
 import weekOfYear from "dayjs/plugin/weekOfYear";
@@ -56,11 +56,10 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filters,   
- setFilters] = useState<FilterState>({});
+  const [filters, setFilters] = useState<FilterState>({});
   const [filteredData, setFilteredData] = useState<TableData[]>(data);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
 
   const filterData = () => {
     const filtered = data.filter((row) => {
@@ -88,7 +87,7 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({
 
   useEffect(() => {
     filterData(); // Call filterData initially and whenever dependencies change
-  }, [data, searchTerm, filters, selectedDate]);
+  }, [data, filters, selectedDate]);
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
@@ -97,14 +96,14 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({
   const handleChangeRowsPerPage = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    setRowsPerPage(parseInt(event.target.value,   
- 10));
+    setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
 
-  const handleSearch = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleSearch = (event: React.KeyboardEvent | React.MouseEvent) => {
+    if ('key' in event && event.key !== 'Enter') return;
     event.preventDefault();
-    filterData(); // Trigger filtering when the search button is clicked
+    filterData(); // Trigger filtering when the search button is clicked or Enter is pressed
   };
 
   const handleFilterChange = (columnId: string, value: string) => {
@@ -113,7 +112,6 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({
       [columnId]: value,
     }));
   };
-
 
   const capitalize = (str: string): string => {
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
@@ -132,7 +130,7 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({
   };
 
   const handleCalendarClose = (selectedDate: Date | null) => {
-    console.log(selectedDate);
+    setSelectedDate(selectedDate);
     setIsCalendarOpen(false);
   };
 
@@ -159,8 +157,10 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({
           <TextField
             variant="outlined"
             size="small"
-            placeholder="Quick Search..."
+            placeholder="Search Field..."
             value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={handleSearch}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -171,9 +171,14 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({
             sx={{ width: 300 }}
           />
           {showCalendar && (
-            <IconButton onClick={() => setIsCalendarOpen(true)}>
-              <CalendarTodayIcon />
-            </IconButton>
+            <Box sx={{ display: "flex", alignItems: "center", border: "1px solid #ccc", borderRadius: 1 }}>
+              <Typography variant="body2" sx={{ mr: 1, ml: 1 }}>
+                {dayjs(selectedDate).format('YYYY-MM-DD')}
+              </Typography>
+              <IconButton onClick={handleCalendarOpen}>
+                <CalendarTodayIcon />
+              </IconButton>
+            </Box>
           )}
           <Button
             type="submit"
@@ -210,7 +215,7 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
       />
-      <Modal open={isCalendarOpen}>
+      <Modal open={isCalendarOpen} onClose={() => setIsCalendarOpen(false)}>
         <Box
           sx={{
             position: "absolute",

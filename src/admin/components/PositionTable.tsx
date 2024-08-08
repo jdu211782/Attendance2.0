@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button,
+  Table, TableBody, TableCell, TableContainer, Box, TableHead, TableRow, Paper, Button,
 } from '@mui/material';
 import { Department, Position } from '../pages/DepartmentPositionManagement'; 
 
@@ -30,8 +30,10 @@ function PositionTable({ positions, departments, onEdit, onDelete }: PositionTab
                 {departments.find(d => d.id === position.departmentId)?.name || 'Unknown'}
               </TableCell>
               <TableCell>
-                <Button onClick={() => onEdit(position)}>Edit</Button>
-                <Button onClick={() => onDelete(position.id)}>Delete</Button>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Button onClick={() => onEdit(position)} variant="outlined" size='small'>Edit</Button>
+                <Button onClick={() => onDelete(position.id)} variant="outlined" size='small' color="error">Delete</Button>
+                </Box>
               </TableCell>
             </TableRow>
           ))}

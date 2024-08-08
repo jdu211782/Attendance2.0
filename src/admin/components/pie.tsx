@@ -15,6 +15,7 @@ const size = {
   width: 300,
   height: 300,
 };
+const palette = ['#6b83d4','#ef9094']
 
 const StyledText = styled('text')(({ theme }) => ({
   fill: theme.palette.text.primary,
@@ -34,7 +35,7 @@ function PieCenterLabel({ children } : PieCenterLabelProps) {
 
 export default function PieChartWithCenterLabel() {
   return (
-    <PieChart series={[{ data, innerRadius: 80 }]} {...size}>
+    <PieChart colors={palette} series={[{ data, innerRadius: 80 }]} {...size}>
       <PieCenterLabel>{data[0].value}%</PieCenterLabel>
     </PieChart>
   );

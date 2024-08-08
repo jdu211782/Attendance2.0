@@ -112,7 +112,7 @@ const AttendanceTableBody: React.FC<AttendanceTableBodyProps> = ({
                         justifyContent: 'center',
                       }}
                     >
-                      {['Present', 'Absent', 'Late Arrival', 'Work From Home', 'Excused Absence'].map((status) => (
+                      {['Present', 'Absent','Excused Absence'].map((status) => (
                         <MenuItem key={status} value={status}>{status}</MenuItem>
                       ))}
                     </Select>
