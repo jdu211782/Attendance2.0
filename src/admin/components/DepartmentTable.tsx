@@ -2,18 +2,21 @@ import React from 'react';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Box
 } from '@mui/material';
-import { Department } from '../pages/DepartmentPositionManagement'; // Импортируем интерфейс
+import { Department } from '../pages/DepartmentPositionManagement';
+import { deleteDepartment } from '../../utils/libs/axios';
 
 interface DepartmentTableProps {
   departments: Department[];
   onEdit: (department: Department) => void;
   onDelete: (departmentId: number) => void;
-
-
-
 }
 
 function DepartmentTable({ departments, onEdit, onDelete }: DepartmentTableProps) {
+  const handleDelete = async (id: number) => {
+    await deleteDepartment(id);
+    onDelete(id);
+  };
+
   return (
     <Paper sx={{  borderRadius: 4, boxShadow: 2, mb: 5}}>
       <Table>
@@ -30,7 +33,7 @@ function DepartmentTable({ departments, onEdit, onDelete }: DepartmentTableProps
               <TableCell>
               <Box sx={{ display: 'flex', gap: 1 }}>
                 <Button onClick={() => onEdit(department)} variant="outlined" size='small'>Edit</Button>
-                <Button onClick={() => onDelete(department.id)} variant="outlined" size='small' color="error">Delete</Button>
+                <Button onClick={() => handleDelete(department.id)} variant="outlined" size='small' color="error">Delete</Button>
                 </Box>
               </TableCell>
             </TableRow>
