@@ -1,5 +1,3 @@
-// pages/DashboardPage.tsx
-
 import React, { useState } from 'react';
 import { Container, Box } from '@mui/material';
 import Header from '../components/Header';
@@ -10,7 +8,7 @@ import mockData from "../components/Table/mockData";
 import { Column, TableData } from "../components/Table/types";
 
 interface DashboardPageProps {
-  employeeData: Employee;
+  employeeData: Employee | null; // Добавлен тип null, чтобы учитывать отсутствие данных
   onLogout: () => void;
 }
 
@@ -24,6 +22,14 @@ const columns: Column[] = [
 const DashboardPage: React.FC<DashboardPageProps> = ({ employeeData, onLogout }) => {
   const [tabIndex, setTabIndex] = useState<number>(0);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  if (!employeeData) {
+    return <div>Загрузка данных сотрудника...</div>; // Сообщение для состояния загрузки
+  }
+
+  if (!employeeData.username) {
+    return <div>Данные сотрудника не найдены.</div>;
+  }
 
   const handleTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabIndex(newValue);
@@ -53,7 +59,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ employeeData, onLogout })
     >
       <Header
         onLogout={onLogout}
-        employeeName={employeeData.name}
+        employeeName={employeeData.username}
         anchorEl={anchorEl}
         handleMenuOpen={handleMenuOpen}
         handleMenuClose={handleMenuClose}

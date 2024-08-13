@@ -2,8 +2,6 @@ export interface Employee {
   id: number;
   username: string;
   password: string;
-  name: string;
-  photoUrl: string;
   isAdmin: boolean;
   checkInTime: Date | null; 
   checkOutTime: Date | null; 
@@ -23,8 +21,6 @@ export const employees: Employee[] = [
     id: 1,
     username: 'Cat',
     password: 'cat123',
-    name: 'Cat',
-    photoUrl: 'images/kotek.png',
     isAdmin: true,
     checkInTime: new Date(),  
     checkOutTime: null, 
@@ -42,8 +38,6 @@ export const employees: Employee[] = [
     id: 2,
     username: 'Dog',
     password: 'dog123',
-    name: 'Dog',
-    photoUrl: 'images/kotek.png',
     isAdmin: false,
     checkInTime: new Date(),  
     checkOutTime: null, 
