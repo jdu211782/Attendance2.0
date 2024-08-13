@@ -12,10 +12,10 @@ interface LoginPageProps {
 
 const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   // Состояние для хранения значений полей ввода и сообщения об ошибке
-  const [employeeId, setEmployeeId] = useState(''); 
-  const [password, setPassword] = useState(''); 
-  const [error, setError] = useState(''); 
-  const navigate = useNavigate(); 
+  const [employeeId, setEmployeeId] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   // Обработчик отправки формы
   const handleLogin = async (e: React.FormEvent) => {
@@ -53,11 +53,11 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
           id: parseInt(employeeId, 10), // Преобразуем строку в число
           username: response.data.employee_id || 'Unknown',
           password: '', // Не храним пароль в объекте сотрудника
-          isAdmin: true, // По умолчанию не админ
+          role: response.data.role || 'employee', // Изменяем здесь на 'role'
+          position: response.data.position || 'Unknown', // Обновляем поле position
           checkInTime: null,
           checkOutTime: null,
           location: 'Unknown',
-          role: response.data.role || 'Employee',
           status: 'Absent', // По умолчанию отсутствует
           attendanceSummary: {
             earlyLeaves: 0,
@@ -69,7 +69,13 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
         console.log('Временные данные сотрудника:', tempEmployeeData);
         onLoginSuccess(tempEmployeeData); // Вызываем функцию при успешном входе
-        navigate("/"); // Перенаправляем на главную страницу
+        
+        // Перенаправляем на соответствующую страницу в зависимости от роли
+        if (tempEmployeeData.role === 'admin') {
+          navigate("/admin"); // Перенаправляем на страницу админа
+        } else {
+          navigate("/dashboard"); // Перенаправляем на страницу сотрудника
+        }
       } else {
         console.error('Токены отсутствуют в ответе');
         setError('Неверный ответ от сервера');
