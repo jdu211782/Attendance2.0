@@ -53,7 +53,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
           id: parseInt(employeeId, 10), // Преобразуем строку в число
           username: response.data.employee_id || 'Unknown',
           password: '', // Не храним пароль в объекте сотрудника
-          role: response.data.role || 'employee', // Изменяем здесь на 'role'
+          role: response.data.data.role || 'employee', // Изменяем здесь на 'role'
           position: response.data.position || 'Unknown', // Обновляем поле position
           checkInTime: null,
           checkOutTime: null,
@@ -71,10 +71,10 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         onLoginSuccess(tempEmployeeData); // Вызываем функцию при успешном входе
         
         // Перенаправляем на соответствующую страницу в зависимости от роли
-        if (tempEmployeeData.role === 'admin') {
+        if (tempEmployeeData.role === 'ADMIN') {
           navigate("/admin"); // Перенаправляем на страницу админа
         } else {
-          navigate("/dashboard"); // Перенаправляем на страницу сотрудника
+          navigate("/"); // Перенаправляем на страницу сотрудника
         }
       } else {
         console.error('Токены отсутствуют в ответе');
