@@ -59,7 +59,7 @@ const MainContent: React.FC<MainContentProps> = ({ tabIndex, handleTabChange, at
         type
       };
 
-      const apiUrl = 'http://192.168.1.100:8080/api/v1';
+      const apiUrl = 'https://attendance-backend-24xu.onrender.com/api/v1';
 
       const response = await axiosInstance.post(apiUrl, data);
 
