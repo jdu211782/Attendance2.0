@@ -2,12 +2,12 @@ export interface Employee {
   id: number;
   username: string;
   password: string;
-  isAdmin: boolean;
-  checkInTime: Date | null; 
-  checkOutTime: Date | null; 
-  location: string;         
-  role: string;
-  status: 'Present' | 'Absent' | 'EarlyLeave'; // Keep this
+  role: 'admin' | 'employee'; 
+  checkInTime: Date | null;
+  checkOutTime: Date | null;
+  location: string;
+  position: string; // Новый тип для позиции
+  status: 'Present' | 'Absent' | 'EarlyLeave'; // Оставляем как есть
   attendanceSummary: {
     earlyLeaves: number;
     absences: number;
@@ -21,11 +21,11 @@ export const employees: Employee[] = [
     id: 1,
     username: 'Cat',
     password: 'cat123',
-    isAdmin: true,
+    role: 'admin',
     checkInTime: new Date(),  
     checkOutTime: null, 
     location: 'office',      
-    role: 'Administrator',
+    position: 'Administrator',
     status: 'Present',
     attendanceSummary: {
       earlyLeaves: 1,
@@ -38,11 +38,11 @@ export const employees: Employee[] = [
     id: 2,
     username: 'Dog',
     password: 'dog123',
-    isAdmin: false,
+    role: 'employee',
     checkInTime: new Date(),  
     checkOutTime: null, 
     location: 'office',      
-    role: 'Administrator',
+    position: 'developer',
     status: 'Present',
     attendanceSummary: {
       earlyLeaves: 0,
