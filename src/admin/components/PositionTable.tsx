@@ -37,7 +37,7 @@ function PositionTable({ positions, onEdit, onDelete, departments }: PositionTab
           {positions.map((position) => (
             <TableRow key={position.id}>
               <TableCell>{position.name}</TableCell>
-              <TableCell>{getDepartmentName(position.departmentId)}</TableCell>
+              <TableCell>{getDepartmentName(position.department_id)}</TableCell>
               <TableCell>
               <Box sx={{ display: 'flex', gap: 1 }}>
                 <Button onClick={() => onEdit(position)} variant="outlined" size='small'>Edit</Button>

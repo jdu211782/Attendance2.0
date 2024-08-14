@@ -1,101 +1,139 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, TextField, Button, Typography, Container, useTheme } from '@mui/material';
-import axiosIntance, { setAuthToken } from '../../utils/libs/axios';
+import { Button, TextField, Typography, Container, Box } from '@mui/material';
+import axiosInstance from '../../utils/libs/axios';
+import axios, { AxiosError } from 'axios';
+import { Employee } from '../../employees';
 
 interface LoginPageProps {
-  onLoginSuccess: (token: string) => void;
+  onLoginSuccess: (employee: Employee) => void;
 }
 
-function LoginPage({ onLoginSuccess }: LoginPageProps) {
-  const [username, setUsername] = useState('');
+const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
+  const [employeeId, setEmployeeId] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const theme = useTheme();
 
-  const handleLogin = async() => {
-    const info = { employee_id: username, password };
-    
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+  
+    if (!employeeId || !password) {
+      setError('Пожалуйста, заполните все поля');
+      return;
+    }
+  
+    const instance = axiosInstance();
     try {
-      const { data } = await axiosIntance.post("/sign-in", info);
-      if (data.access_token) {
-        setAuthToken(data.access_token); // Устанавливаем токен
-        onLoginSuccess(data.access_token);
-        navigate('/');
+      console.log('Попытка входа c ID:', employeeId);
+      const response = await instance.post("/sign-in", {
+        employee_id: employeeId,
+        password: password
+      });
+  
+      console.log('Ответ от сервера:', response);
+  
+      if (response.data && response.data.data && response.data.data.access_token) {
+        // Сохраняем токены в localStorage
+        localStorage.setItem("access_token", response.data.data.access_token);
+        localStorage.setItem("refresh_token", response.data.data.refresh_token);
+        console.log('Токены сохранены в localStorage');
+  
+        // Если ваш сервер возвращает данные сотрудника, получите их
+        const employeeData: Employee = response.data.employee;
+        onLoginSuccess(employeeData);
+        if (response.data.data.role == "ADMIN"){
+        navigate("/admin");
       } else {
-        setError('Ошибка авторизации');
+        navigate("/");
       }
-    } catch (error) {
-      setError('Неверное имя пользователя или пароль');
+      } else {
+        console.error('Токены отсутствуют в ответе');
+        setError('Неверный ответ от сервера');
+      }
+    } catch (err) {
+      console.error('Ошибка при входе:', err);
+      
+      if (axios.isAxiosError(err)) {
+        const axiosError = err as AxiosError;
+        console.error("Детали ошибки:", axiosError);
+        console.error("Статус ответа:", axiosError.response?.status);
+        console.error("Данные ответа:", axiosError.response?.data);
+        
+        if (axiosError.response) {
+          const errorMessage = typeof axiosError.response.data === 'object' && axiosError.response.data !== null
+            ? (axiosError.response.data as { message?: string }).message || 'Неизвестная ошибка'
+            : 'Неизвестная ошибка';
+          setError(`Ошибка ${axiosError.response.status}: ${errorMessage}`);
+        } else if (axiosError.request) {
+          setError('Нет ответа от сервера. Проверьте подключение к интернету.');
+        } else {
+          setError(`Ошибка: ${axiosError.message}`);
+        }
+      } else {
+        console.error("Неизвестная ошибка:", err);
+        setError("Произошла неизвестная ошибка");
+      }
     }
   };
 
+
   return (
-    <Container maxWidth="xs">
+    <Container component="main" maxWidth="xs">
       <Box
         sx={{
           marginTop: 8,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          padding: 3, 
-          borderRadius: 4, 
-          boxShadow: 3, 
-          backgroundColor: '#f0f8ff', 
         }}
       >
         <Typography component="h1" variant="h5">
-          Log In
+          Вход в систему
         </Typography>
-        <TextField
-          margin="normal"
-          required
-          fullWidth
-          id="username"
-          label="username"
-          name="username"
-          autoComplete="username"
-          autoFocus
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-        <TextField
-          margin="normal"
-          required
-          fullWidth
-          name="password"
-          label="password"
-          type="password"
-          id="password"
-          autoComplete="current-password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        {error && (
-          <Typography variant="body2" color="error">
-            {error}
-          </Typography>
-        )}
-        <Button
-          type="submit"
-          fullWidth
-          variant="contained"
-          sx={{ 
-            mt: 3, 
-            mb: 2, 
-            backgroundColor: theme.palette.success.light, 
-            '&:hover': {
-              backgroundColor: theme.palette.success.dark, 
-            },
-          }}
-          onClick={handleLogin}
-        >
-          Continue
-        </Button>
+        <Box component="form" onSubmit={handleLogin} noValidate sx={{ mt: 1 }}>
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="employee_id"
+            label="ID сотрудника"
+            name="employee_id"
+            autoComplete="employee_id"
+            autoFocus
+            value={employeeId}
+            onChange={(e) => setEmployeeId(e.target.value)}
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            name="password"
+            label="Пароль"
+            type="password"
+            id="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{ mt: 3, mb: 2 }}
+          >
+            Войти
+          </Button>
+          {error && (
+            <Typography color="error" align="center">
+              {error}
+            </Typography>
+          )}
+        </Box>
       </Box>
     </Container>
   );
-}
+};
 
 export default LoginPage;
