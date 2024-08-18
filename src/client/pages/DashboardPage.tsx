@@ -4,8 +4,8 @@ import Header from '../components/Header';
 import MainContent from '../components/MainContent';
 import '@fontsource/poppins/500.css';
 import { Employee } from '../../employees';
-import mockData from "../components/Table/mockData"; 
 import { Column, TableData } from "../components/Table/types";
+// import mockData from '../components/Table/mockData';
 
 interface DashboardPageProps {
   employeeData: Employee | null; // Добавлен тип null, чтобы учитывать отсутствие данных
@@ -69,9 +69,8 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ employeeData, onLogout })
           tabIndex={tabIndex} 
           handleTabChange={handleTabChange}
           attendanceSummary={employeeData.attendanceSummary}
-          userId={employeeData.id}
+          employeeId={employeeData.id}
           username={employeeData.username}
-          tableData={mockData as TableData[]}
           tableColumns={columns}
         />
       </Box>

@@ -1,48 +1,102 @@
-import React from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { Box, Typography, Grid, MenuItem, Select, FormControl, SelectChangeEvent } from '@mui/material';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import TimelapseIcon from '@mui/icons-material/Timelapse';
-import { TimesheetDay, TimesheetWeekData, weekRanges, timesheetData } from './TimesheetData';
+import { intervals } from './TimesheetData';
+import { getWeeklyTimesheetData } from './attendanceService';
 
-const getTimeColor = (time: string, isCheckIn: boolean, isWeekend: boolean) => {
+export interface TimesheetDay {
+  work_day: string;
+  come_time: string | null;
+  leave_time: string | null;
+  total_hours: string | null;
+}
+
+interface WeeklyTimesheetProps {
+  year: number;
+  month: number;
+}
+
+const getWeekRangeFromDate = (workDay: string): string => {
+  const day = parseInt(workDay.split('-')[2], 10);
+  if (day >= 1 && day <= 10) return '0';
+  if (day >= 11 && day <= 20) return '1';
+  return '2';
+};
+
+const formatDay = (day: string): string => {
+  const dayNumber = parseInt(day.split('-')[2], 10);
+  return String(dayNumber).padStart(2, '0');
+};
+
+const getTimeColor = (time: string | null, isCheckIn: boolean, isWeekend: boolean): string => {
   if (!time) return isWeekend ? '#cccccc' : '#ff3b30';
-  const [hours, minutes] = time.split(':').map(Number);
+  const [hours, minutes] = time.split(':').map(Number); 
+  
   if (isCheckIn) {
-    return hours < 9 || (hours === 10 && minutes === 0) ? '#00af6c' : '#ff9500';
+    return hours < 10 || (hours === 10 && minutes <= 30) ? '#00af6c' : '#ff9500';
   } else {
-    return hours > 17 || (hours === 17 && minutes >= 30) ? '#00af6c' : '#ff9500';
+    return hours > 18 || (hours === 18 && minutes >= 0) ? '#00af6c' : '#ff9500';
   }
 };
 
-const getTotalHoursColor = (totalHours: string, isWeekend: boolean) => {
-  if (!totalHours) return isWeekend ? '#cccccc' : '#ff3b30';
-  const [hours, minutes] = totalHours.split(':').map(Number);
-  if (hours > 8 || (hours === 8 && minutes > 0)) {
-    return '#00af6c';
-  } else if (hours < 2 || (hours === 2 && minutes === 0)) {
-    return isWeekend ? '#00af6c' : '#ff3b30';
-  } else {
-    return '#ff9500';
-  }
+const getTotalHoursColor = (totalHours: string | null, isWeekend: boolean): string => {
+  if (!totalHours) return '#ccc';
+  return '#2196f3';
 };
 
-const formatDay = (day: number) => {
-  return String(day).padStart(2, '0');
+const isWeekend = (weekday: string): boolean => {
+  return weekday === 'суббота' || weekday === 'воскресенье';
 };
 
-const isWeekend = (weekday: string) => {
-  return weekday === 'Sat' || weekday === 'Sun';
+const getWeekday = (dateString: string): string => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-EN', { weekday: 'short' });
 };
 
-const WeeklyTimesheet: React.FC<{ timesheetData: TimesheetWeekData }> = ({ timesheetData }) => {
-  const [selectedWeek, setSelectedWeek] = React.useState(weekRanges[0]);
+const WeeklyTimesheet: React.FC<WeeklyTimesheetProps> = ({ year, month }) => {
+  const [selectedInterval, setSelectedInterval] = useState<string>(intervals[0]);
+  const [timesheetData, setTimesheetData] = useState<TimesheetDay[] | null>(null);
 
-  const handleWeekChange = (event: SelectChangeEvent<string>) => {
-    setSelectedWeek(event.target.value);
+  const handleIntervalChange = (event: SelectChangeEvent<string>) => {
+    setSelectedInterval(event.target.value);
   };
 
-  const weekDisplayNames = weekRanges.map((_, index) => `Week ${index + 1}`);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const interval = parseInt(selectedInterval, 10);
+        const response = await getWeeklyTimesheetData(year, month, interval);
+        if (response && response.data && Array.isArray(response.data.results)) {
+          setTimesheetData(response.data.results);
+        } else {
+          console.error('Неверный формат данных:', response);
+        }
+      } catch (error) {
+        console.error('Ошибка при загрузке данных:', error);
+      }
+    };
+
+    fetchData();
+  }, [year, month, selectedInterval]);
+
+  const intervalDisplayNames = intervals.map((_, index) => `Interval ${index + 1}`);
+
+  const selectedDays = useMemo(() => {
+    if (!timesheetData) return [];
+
+    return timesheetData
+      .filter(day => {
+        const weekRange = getWeekRangeFromDate(day.work_day);
+        return weekRange === selectedInterval;
+      })
+      .sort((a, b) => a.work_day.localeCompare(b.work_day));
+  }, [timesheetData, selectedInterval]);
+
+  if (!timesheetData) {
+    return <Typography>Loading...</Typography>;
+  }
 
   return (
     <Box sx={{ mb: 3, mt: 3, backgroundColor: '#ffffff', borderRadius: 2, overflow: 'hidden', boxShadow: 1, p: 1 }}>
@@ -56,11 +110,11 @@ const WeeklyTimesheet: React.FC<{ timesheetData: TimesheetWeekData }> = ({ times
         mb: 1,
         boxShadow: 1,
       }}>
-        <Typography variant="h6">Weeks</Typography>
+        <Typography variant="h6">Intervals</Typography>
         <FormControl variant="outlined" size="small" sx={{ minWidth: 120 }}>
           <Select
-            value={selectedWeek}
-            onChange={handleWeekChange}
+            value={selectedInterval}
+            onChange={handleIntervalChange}
             sx={{ textAlign: 'center' }}
             MenuProps={{
               PaperProps: {
@@ -73,25 +127,23 @@ const WeeklyTimesheet: React.FC<{ timesheetData: TimesheetWeekData }> = ({ times
               },
             }}
           >
-            {weekRanges.map((weekRange, index) => (
-              <MenuItem key={index} value={weekRange} sx={{ justifyContent: 'center' }}>
-                {weekDisplayNames[index]}
+            {intervals.map((interval, index) => (
+              <MenuItem key={index} value={interval} sx={{ justifyContent: 'center' }}>
+                {intervalDisplayNames[index]}
               </MenuItem>
             ))}
           </Select>
         </FormControl>
       </Box>
       <Grid container spacing={1}>
-        {timesheetData[selectedWeek]?.map((day, index) => {
-          const checkInColor = getTimeColor(day.checkIn, true, isWeekend(day.weekday));
-          const checkOutColor = getTimeColor(day.checkOut, false, isWeekend(day.weekday));
-          const totalHoursColor = getTotalHoursColor(day.totalHours, isWeekend(day.weekday));
+        {selectedDays.map((day) => {
+          const weekday = getWeekday(day.work_day);
+          const checkInColor = getTimeColor(day.come_time, true, isWeekend(weekday));
+          const checkOutColor = getTimeColor(day.leave_time, false, isWeekend(weekday));
+          const totalHoursColor = getTotalHoursColor(day.total_hours, isWeekend(weekday));
           
-          // Добавим логирование для отладки
-          console.log(`Day ${day.day} - CheckIn: ${checkInColor}, CheckOut: ${checkOutColor}, TotalHours: ${totalHoursColor}`);
-
           return (
-            <Grid item xs={12} key={index}>
+            <Grid item xs={12} key={day.work_day}>
               <Box sx={{
                 display: 'flex',
                 alignItems: 'center',
@@ -106,25 +158,25 @@ const WeeklyTimesheet: React.FC<{ timesheetData: TimesheetWeekData }> = ({ times
               }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '60px' }}>
                   <Typography variant="body2" sx={{ fontSize: '12px' }}>
-                    {formatDay(day.day)} {day.weekday}
+                    {formatDay(day.work_day)} {weekday}
                   </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                   <AccessTimeIcon style={{ marginRight: '4px', color: checkInColor }} />
                   <Typography variant="body2" style={{ color: checkInColor, fontSize: '12px' }}>
-                    {day.checkIn || '--:--'}
+                    {day.come_time || '--:--'}
                   </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                   <ExitToAppIcon style={{ marginRight: '4px', color: checkOutColor }} />
                   <Typography variant="body2" style={{ color: checkOutColor, fontSize: '12px' }}>
-                    {day.checkOut || '--:--'}
+                    {day.leave_time || '--:--'}
                   </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                   <TimelapseIcon style={{ marginRight: '4px', color: totalHoursColor }} />
                   <Typography variant="body2" style={{ color: totalHoursColor, fontSize: '12px' }}>
-                    {day.totalHours || '--:--'}
+                    {day.total_hours || '--:--'}
                   </Typography>
                 </Box>
               </Box>

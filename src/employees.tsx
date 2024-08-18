@@ -1,5 +1,5 @@
 export interface Employee {
-  id: number;
+  id: string;
   username: string;
   password: string;
   role: 'ADMIN' | 'EMPLOYEE'; 
@@ -18,7 +18,7 @@ export interface Employee {
 
 export const employees: Employee[] = [
   {
-    id: 1,
+    id: '1',
     username: 'Cat',
     password: 'cat123',
     role: 'ADMIN',
@@ -35,7 +35,7 @@ export const employees: Employee[] = [
     }
   },
   {
-    id: 2,
+    id: '2',
     username: 'Dog',
     password: 'dog123',
     role: 'EMPLOYEE',

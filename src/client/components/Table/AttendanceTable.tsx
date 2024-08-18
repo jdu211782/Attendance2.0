@@ -20,30 +20,33 @@ import AttendanceTableBody from "./AttendanceTableBody";
 import CalendarModal from "./CalendarModal";
 
 interface AttendanceTableProps {
-  initialData: TableData[];
   columns: Column[];
+  data: TableData[];
   onEdit?: (item: TableData) => void;
   onDelete?: (id: string) => void;
   tableTitle?: string;
   showCalendar?: boolean;
+  isLoading: boolean;
+  error: string | null;
 }
 
 const AttendanceTable: React.FC<AttendanceTableProps> = ({
-  initialData,
   columns,
+  data,
   onEdit,
   onDelete,
   tableTitle,
-  showCalendar = true
+  showCalendar = true,
+  isLoading,
+  error
 }) => {
-  const [data, setData] = useState<TableData[]>(initialData);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState<FilterState>({});
-  const [filteredData, setFilteredData] = useState<TableData[]>(data);
+  const [filteredData, setFilteredData] = useState<TableData[]>([]);
   const [isCalendarOpen, setCalendarOpen] = useState(false);
-  const [pendingSearch, setPendingSearch] = useState(""); // Новое состояние для отслеживания значения поиска
+  const [pendingSearch, setPendingSearch] = useState("");
 
   useEffect(() => {
     const filtered = data.filter((row) => {
@@ -93,18 +96,6 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({
     }));
   };
 
-  const capitalize = (str: string): string => {
-    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-  };
-
-  const handleStatusChange = (rowId: string, newStatus: string) => {
-    setData(prevData =>
-      prevData.map(row =>
-        row.id === rowId ? { ...row, status: capitalize(newStatus) } : row
-      )
-    );
-  };
-
   const handleCalendarOpen = () => {
     setCalendarOpen(true);
   };
@@ -112,6 +103,14 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({
   const handleCalendarClose = () => {
     setCalendarOpen(false);
   };
+
+  if (error) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
+        <Typography color="error">{error}</Typography>
+      </Box>
+    );
+  }
 
   return (
     <Paper sx={{ width: "100%", overflow: "hidden", borderRadius: 4, mb: 5 }}>
@@ -149,13 +148,18 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({
           <AttendanceTableHead columns={columns} filters={filters} onFilterChange={handleFilterChange} />
           <AttendanceTableBody
             columns={columns}
-            filteredData={filteredData}
-            onStatusChange={handleStatusChange}
+            filteredData={filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)}
+            onStatusChange={(rowId, newStatus) => {}}
             onEdit={onEdit}
             onDelete={onDelete}
           />
         </Table>
       </TableContainer>
+      {/* {filteredData.length === 0 && !isLoading && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
+          <Typography>No data available</Typography>
+        </Box>
+      )} */}
       <TablePagination
         rowsPerPageOptions={[10, 25, 100]}
         component="div"
