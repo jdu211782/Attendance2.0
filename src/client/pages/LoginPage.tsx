@@ -1,80 +1,79 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, TextField, Typography, Container, Box } from '@mui/material';
+import {
+  Button,
+  TextField,
+  Typography,
+  Container,
+  Box,
+  useTheme,
+} from '@mui/material';
 import axiosInstance from '../../utils/libs/axios';
 import axios, { AxiosError } from 'axios';
 import { Employee } from '../../employees';
 
-// Интерфейс для пропсов компонента LoginPage
 interface LoginPageProps {
-  onLoginSuccess: (employee: Employee) => void; // Функция, вызываемая при успешном входе
+  onLoginSuccess: (employee: Employee) => void;
 }
 
 const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
-  // Состояние для хранения значений полей ввода и сообщения об ошибке
   const [employeeId, setEmployeeId] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const theme = useTheme();
 
-  // Обработчик отправки формы
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault(); // Предотвращаем перезагрузку страницы
-    setError(''); // Сбрасываем сообщение об ошибке
+    e.preventDefault();
+    setError('');
 
-    // Проверяем, что все поля заполнены
     if (!employeeId || !password) {
-      setError('Пожалуйста, заполните все поля');
+      setError('Please fill in all fields');
       return;
     }
 
     try {
       console.log('Попытка входа c ID:', employeeId);
-      // Выполняем запрос на сервер для аутентификации
       const response = await axiosInstance.post("/sign-in", {
         employee_id: employeeId,
-        password: password
+        password: password,
       });
 
       console.log('Ответ от сервера:', response);
 
-      // Проверяем, что токены присутствуют в ответе
       if (response.data && response.data.data && response.data.data.access_token) {
         const accessToken = response.data.data.access_token;
         const refreshToken = response.data.data.refresh_token;
         
-        // Сохраняем токены в localStorage
         localStorage.setItem("access_token", accessToken);
         localStorage.setItem("refresh_token", refreshToken);
         console.log('Токены сохранены в localStorage');
 
-        // Создаем объект сотрудника с полученными данными и значениями по умолчанию
         const tempEmployeeData: Employee = {
-          id: parseInt(employeeId, 10), // Преобразуем строку в число
+          id: employeeId,
           username: response.data.employee_id || 'Unknown',
-          password: '', // Не храним пароль в объекте сотрудника
-          role: response.data.role || 'employee', // Изменяем здесь на 'role'
-          position: response.data.position || 'Unknown', // Обновляем поле position
+          password: '',
+          role: response.data.data.role || 'employee',
+          position: response.data.position || 'Unknown',
           checkInTime: null,
           checkOutTime: null,
           location: 'Unknown',
-          status: 'Absent', // По умолчанию отсутствует
+          status: 'Absent',
           attendanceSummary: {
             earlyLeaves: 0,
             absences: 0,
             lateIns: 0,
-            leaves: 0
-          }
+            leaves: 0,
+          },
         };
 
         console.log('Временные данные сотрудника:', tempEmployeeData);
-        onLoginSuccess(tempEmployeeData); // Вызываем функцию при успешном входе
+        onLoginSuccess(tempEmployeeData);
         
-        // Перенаправляем на соответствующую страницу в зависимости от роли
-        if (tempEmployeeData.role === 'admin') {
-          navigate("/admin"); // Перенаправляем на страницу админа
+        if (tempEmployeeData.role === 'ADMIN') {
+          navigate("/admin");
         } else {
-          navigate("/dashboard"); // Перенаправляем на страницу сотрудника
+          navigate("/");
         }
       } else {
         console.error('Токены отсутствуют в ответе');
@@ -83,7 +82,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
     } catch (err) {
       console.error('Ошибка при входе:', err);
       
-      // Обработка ошибок, связанных с axios
       if (axios.isAxiosError(err)) {
         const axiosError = err as AxiosError;
         console.error("Детали ошибки:", axiosError);
@@ -108,25 +106,38 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   };
 
   return (
-    <Container component="main" maxWidth="xs">
+    <Container
+      maxWidth="sm"
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
       <Box
         sx={{
-          marginTop: 8,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
+          padding: 4,
+          borderRadius: 4,
+          boxShadow: 3,
+          backgroundColor: '#f0f8ff',
+          width: '100%',
+          maxWidth: 400,
         }}
       >
         <Typography component="h1" variant="h5">
-          Вход в систему
+          Sign in
         </Typography>
-        <Box component="form" onSubmit={handleLogin} noValidate sx={{ mt: 1 }}>
+        <Box component="form" onSubmit={handleLogin} noValidate sx={{ mt: 1, }}>
           <TextField
             margin="normal"
             required
             fullWidth
             id="employee_id"
-            label="ID сотрудника"
+            label="User ID"
             name="employee_id"
             autoComplete="employee_id"
             autoFocus
@@ -138,26 +149,33 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             required
             fullWidth
             name="password"
-            label="Пароль"
+            label="Password"
             type="password"
             id="password"
             autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
+          {error && (
+            <Typography variant="body2" color="error">
+              {error}
+            </Typography>
+          )}
           <Button
             type="submit"
             fullWidth
             variant="contained"
-            sx={{ mt: 3, mb: 2 }}
+            sx={{
+              mt: 3,
+              mb: 2,
+              backgroundColor: theme.palette.success.light,
+              '&:hover': {
+                backgroundColor: theme.palette.success.dark,
+              },
+            }}
           >
-            Войти
+            Sign in
           </Button>
-          {error && (
-            <Typography color="error" align="center">
-              {error}
-            </Typography>
-          )}
         </Box>
       </Box>
     </Container>

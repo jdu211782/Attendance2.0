@@ -34,14 +34,15 @@ axiosInstance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
     } else {
       config.headers['Authorization'] = `Bearer ${token}`;
       console.log('Токен добавлен в заголовок запроса');
+    
     }
   }
 
-  console.log('Отправляемый запрос:', config);
-  console.log('URL запроса:', config.url);
-  console.log('Метод запроса:', config.method);
-  console.log('Данные запроса:', config.data);
-  console.log('Заголовки запроса:', config.headers);
+  // console.log('Отправляемый запрос:', config);
+  // console.log('URL запроса:', config.url);
+  // console.log('Метод запроса:', config.method);
+  // console.log('Данные запроса:', config.data);
+  // console.log('Заголовки запроса:', config.headers);
 
   return config;
 }, (error: AxiosError) => {
@@ -52,22 +53,21 @@ axiosInstance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 // Интерцептор ответов
 axiosInstance.interceptors.response.use(
   (response) => {
-    console.log('Получен ответ:', response);
-    console.log('Статус ответа:', response.status);
-    console.log('Данные ответа:', response.data);
+    // console.log('Получен ответ:', response);
+    // console.log('Статус ответа:', response.status);
+    // console.log('Данные ответа:', response.data);
     return response;
   },
   (error: AxiosError) => {
     console.error('Ошибка ответа:', error);
     if (error.response) {
-      console.error('Статус ответа:', error.response.status);
-      console.error('Данные ответа:', error.response.data);
+      // console.error('Статус ответа:', error.response.status);
+      // console.error('Данные ответа:', error.response.data);
 
       if (error.response.status === 401) {
-        console.error('Ошибка аутентификации. Возможно, токен недействителен или истек.');
-        // Здесь можно добавить логику для выхода из системы или обновления токена
+        // console.error('Ошибка аутентификации. Возможно, токен недействителен или истек.');
         localStorage.removeItem('access_token');
-        // Перенаправление на страницу входа или обновление токена
+        // Здесь можно добавить логику для выхода из системы или обновления токена
       }
     }
     return Promise.reject(error);

@@ -1,8 +1,8 @@
 export interface Employee {
-  id: number;
+  id: string;
   username: string;
   password: string;
-  role: 'admin' | 'employee'; 
+  role: 'ADMIN' | 'EMPLOYEE'; 
   checkInTime: Date | null;
   checkOutTime: Date | null;
   location: string;
@@ -18,10 +18,10 @@ export interface Employee {
 
 export const employees: Employee[] = [
   {
-    id: 1,
+    id: '1',
     username: 'Cat',
     password: 'cat123',
-    role: 'admin',
+    role: 'ADMIN',
     checkInTime: new Date(),  
     checkOutTime: null, 
     location: 'office',      
@@ -35,10 +35,10 @@ export const employees: Employee[] = [
     }
   },
   {
-    id: 2,
+    id: '2',
     username: 'Dog',
     password: 'dog123',
-    role: 'employee',
+    role: 'EMPLOYEE',
     checkInTime: new Date(),  
     checkOutTime: null, 
     location: 'office',      

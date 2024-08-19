@@ -1,12 +1,10 @@
-// components/MainContent.tsx
-
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button, Divider } from '@mui/material';
 import { format, intervalToDuration } from 'date-fns';
 import AttendanceSummary from './AttendanceSummary';
 import TabsComponent from './TabsComponent';
-import AttendanceTable from "./Table/AttendanceTable";
-import { Column } from "./Table/types";
+import AttendanceDataProvider from './Table/AttendanceDataProvider';
+import { Column } from './Table/types';
 import axiosInstance from '../../utils/libs/axios';
 
 interface MainContentProps {
@@ -15,15 +13,26 @@ interface MainContentProps {
   attendanceSummary: {
     [key: string]: number;
   };
-  userId: number;
+  employeeId: string;
   username: string;
-  tableData: any[]; // Добавлено
-  tableColumns: Column[]; // Добавлено
+  tableColumns: Column[];
 }
 
-const MainContent: React.FC<MainContentProps> = ({ tabIndex, handleTabChange, attendanceSummary, userId, username, tableData, tableColumns }) => {
-  const [checkInTime, setCheckInTime] = useState<Date | null>(null);
-  const [checkOutTime, setCheckOutTime] = useState<Date | null>(null);
+interface DashboardData {
+  come_time: string;
+  leave_time: string;
+  total_hours: string;
+}
+
+const MainContent: React.FC<MainContentProps> = ({
+  tabIndex,
+  handleTabChange,
+  attendanceSummary,
+  employeeId,
+  tableColumns,
+}) => {
+  const [checkInTime, setCheckInTime] = useState<string>('--:--');
+  const [checkOutTime, setCheckOutTime] = useState<string>('--:--');
   const [totalHours, setTotalHours] = useState<string>('--:--');
   const [message, setMessage] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState<string>(format(new Date(), 'HH:mm:ss'));
@@ -32,8 +41,27 @@ const MainContent: React.FC<MainContentProps> = ({ tabIndex, handleTabChange, at
     const interval = setInterval(() => {
       setCurrentTime(format(new Date(), 'HH:mm:ss'));
     }, 1000);
+
+    fetchDashboardData();
+
     return () => clearInterval(interval);
   }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      const response = await axiosInstance.get<{ data: DashboardData, status: boolean }>('/user/dashboard');
+      console.log('Ответ от сервера:', response);
+      
+      if (response.data.status) {
+        const { come_time, leave_time, total_hours } = response.data.data;
+        setCheckInTime(come_time);
+        setCheckOutTime(leave_time);
+        setTotalHours(total_hours);
+      }
+    } catch (error) {
+      console.error('Ошибка при получении данных дашборда:', error);
+    }
+  };
 
   const getCurrentPosition = (): Promise<GeolocationPosition> => {
     return new Promise((resolve, reject) => {
@@ -43,7 +71,7 @@ const MainContent: React.FC<MainContentProps> = ({ tabIndex, handleTabChange, at
         navigator.geolocation.getCurrentPosition(resolve, reject, {
           enableHighAccuracy: true,
           timeout: 5000,
-          maximumAge: 0
+          maximumAge: 0,
         });
       }
     });
@@ -53,57 +81,38 @@ const MainContent: React.FC<MainContentProps> = ({ tabIndex, handleTabChange, at
     try {
       const position = await getCurrentPosition();
       const data = {
-        userId,
+        employee_id: employeeId,
         latitude: position.coords.latitude,
         longitude: position.coords.longitude,
-        type
+        type,
       };
 
-      const apiUrl = 'https://attendance-backend-24xu.onrender.com/api/v1';
-
-      const response = await axiosInstance.post(apiUrl, data);
-
-      console.log(`Данные ${type} успешно отправлены:`, response.data);
-      return new Date();
+      await axiosInstance.post('/attendance', data);
+      console.log(`Данные ${type} успешно отправлены`);
+      fetchDashboardData(); // Обновляем данные после отправки
     } catch (error) {
-      if (error instanceof GeolocationPositionError) {
-        switch(error.code) {
-          case error.PERMISSION_DENIED:
-            console.error("Пользователь отказал в доступе к геолокации");
-            break;
-          case error.POSITION_UNAVAILABLE:
-            console.error("Информация о местоположении недоступна");
-            break;
-          case error.TIMEOUT:
-            console.error("Истекло время ожидания запроса на получение местоположения пользователя");
-            break;
-        }
-      }
+      console.error(`Ошибка при отправке данных ${type}:`, error);
       throw error;
     }
   };
 
   const handleComeClick = async () => {
     try {
-      const checkInTime = await sendAttendanceData('checkIn');
-      setCheckInTime(checkInTime);
-      setMessage(`Добро пожаловать! Вы отметились в ${format(checkInTime, 'HH:mm')}`);
-      setCheckOutTime(null);
-      setTotalHours('--:--');
+      await sendAttendanceData('checkIn');
+      await fetchDashboardData(); // Обновляем данные после отправки
+      setMessage(`Добро пожаловать! Вы отметились в ${checkInTime}`);
     } catch (error) {
       console.error('Ошибка при отметке прихода:', error);
       setMessage('Ошибка при отметке прихода. Пожалуйста, проверьте разрешения на геолокацию и попробуйте снова.');
     }
   };
-
+  
   const handleLeaveClick = async () => {
-    if (checkInTime) {
+    if (checkInTime !== '--:--') {
       try {
-        const checkOutTime = await sendAttendanceData('checkOut');
-        setCheckOutTime(checkOutTime);
-        setMessage(`До свидания! Вы отметились в ${format(checkOutTime, 'HH:mm')}`);
-        const duration = intervalToDuration({ start: checkInTime, end: checkOutTime });
-        setTotalHours(`${duration.hours || 0}ч ${duration.minutes || 0}м`);
+        await sendAttendanceData('checkOut');
+        await fetchDashboardData(); // Обновляем данные после отправки
+        setMessage(`До свидания! Вы отметились в ${checkOutTime}`);
       } catch (error) {
         console.error('Ошибка при отметке ухода:', error);
         setMessage('Ошибка при отметке ухода. Пожалуйста, проверьте разрешения на геолокацию и попробуйте снова.');
@@ -114,17 +123,19 @@ const MainContent: React.FC<MainContentProps> = ({ tabIndex, handleTabChange, at
   };
 
   return (
-    <Box sx={{
-      flexGrow: 1,
-      bgcolor: 'white',
-      borderRadius: 4,
-      boxShadow: 3,
-      p: 3,
-      overflow: 'hidden',
-      textAlign: 'center',
-      position: 'relative',
-      padding: 1,
-    }}>
+    <Box
+      sx={{
+        flexGrow: 1,
+        bgcolor: 'white',
+        borderRadius: 4,
+        boxShadow: 3,
+        p: 3,
+        overflow: 'hidden',
+        textAlign: 'center',
+        position: 'relative',
+        padding: 1,
+      }}
+    >
       <TabsComponent tabIndex={tabIndex} handleTabChange={handleTabChange} />
 
       {tabIndex === 0 && (
@@ -138,7 +149,7 @@ const MainContent: React.FC<MainContentProps> = ({ tabIndex, handleTabChange, at
           <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center', gap: 2 }}>
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <Typography variant="h6" sx={{ color: '#1c1f26' }}>
-                {checkInTime ? format(checkInTime, 'HH:mm') : '--:--'}
+                {checkInTime}
               </Typography>
               <Typography variant="body2" color="#666666" sx={{ mt: 1 }}>
                 Check In
@@ -147,7 +158,7 @@ const MainContent: React.FC<MainContentProps> = ({ tabIndex, handleTabChange, at
             <Divider orientation="vertical" flexItem sx={{ mx: 1, borderColor: '#d6d6d6' }} />
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <Typography variant="h6" sx={{ color: '#1c1f26' }}>
-                {checkOutTime ? format(checkOutTime, 'HH:mm') : '--:--'}
+                {checkOutTime}
               </Typography>
               <Typography variant="body2" color="#666666" sx={{ mt: 1 }}>
                 Check Out
@@ -203,12 +214,7 @@ const MainContent: React.FC<MainContentProps> = ({ tabIndex, handleTabChange, at
 
       {tabIndex === 2 && (
         <Box sx={{ overflowX: 'auto' }}>
-          <AttendanceTable 
-            initialData={tableData} 
-            columns={tableColumns}
-            tableTitle=" "
-            showCalendar={false}
-          />
+          <AttendanceDataProvider />
         </Box>
       )}
     </Box>
