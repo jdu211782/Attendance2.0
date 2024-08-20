@@ -49,7 +49,7 @@ const QrReader = () => {
       // Simulate server request
       setTimeout(() => {
         console.log("Server response: Успешно прошли");
-      }, 1000);
+      }, 10000);
     } catch (error) {
       console.error("Error getting geolocation or sanding data:", error);
     }

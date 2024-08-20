@@ -6,7 +6,6 @@ import LoginPage from "./client/pages/LoginPage";
 import DashboardPage from "./client/pages/DashboardPage";
 import AdminDashboard from "./admin/pages/AdminDashboard";
 import { Employee } from "./employees";
-import SideMenu from "./admin/components/SideMenu";
 import { Box, Grid } from "@mui/material";
 import "./shared/styles/App.css";
 import QrReader from "./client/pages/QrReader";

@@ -1,50 +1,56 @@
-import React, { useState, useRef, useLayoutEffect } from "react"; // Import useLayoutEffect and useRef
+import React, { useEffect, useState } from 'react';
 import { BarChart } from "@mui/x-charts";
+import axiosInstance from '../../utils/libs/axios';
 
-
-const data = [61, 77, 54, 89, 65, 86];
-const xLabels = ["Admstr", "Sales", "HR", "Mrkt", "Social", "IT"];
-
-
-
+interface BarData {
+  department: string;
+  percentage: number;
+}
 
 export default function SimpleBarChart() {
-  
-  const chartRef = useRef<HTMLDivElement | null>(null);
-  const [chartWidth, setChartWidth] = useState<number>(470); 
-  
-  useLayoutEffect(() => {
-    if (chartRef.current) {
-      setChartWidth(chartRef.current.offsetWidth); // Get actual width on mount and resize
-    }
+  const [data, setData] = useState<number[]>([]);
+  const [xLabels, setXLabels] = useState<string[]>([]);
+
+  useEffect(() => {
+    getBarData();
   }, []);
+
+  const getBarData = async () => {
+    try {
+      const response = await axiosInstance().get('/attendance/barchart');
+      const barData: BarData[] = response.data.data;
+      
+
+      // Маппинг данных для графика
+      const percentages = barData.map(item => item.percentage);
+      const labels = barData.map(item => item.department);
+
+      setData(percentages);
+      setXLabels(labels);
+    } catch (err) {
+      console.log('Error fetching bar data:', err);
+    }
+  };
 
   return (
     <BarChart
-      width={chartWidth}
-      height={300}
+    barLabel={(item, context) => {
+      return context.bar.height < 60 ? null : item.value?.toString();
+    }}
+      width={430}
+      height={300} 
+      borderRadius={10}
       series={[
         {
           data,
-          label: "department attendance",
+          label: ("department attendance"),
           id: "pvId",
+          
         },
       ]}
       xAxis={[{ data: xLabels, scaleType: "band" }]}
     >
-      {/* Custom bar labels */}
-      {data.map((value, index) => (
-        <text
-          key={index}
-          x={index * 62 + 80} // Adjust positioning as needed
-          y={236} // Adjust positioning as needed
-          textAnchor="middle"
-          dominantBaseline="central"
-          fill="black"
-        >
-          {((value / 100) * 100).toFixed(0)}%
-        </text>
-      ))}
+      
     </BarChart>
   );
 }

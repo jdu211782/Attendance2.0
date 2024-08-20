@@ -12,155 +12,146 @@ import {
   Modal,
   Button,
 } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday"; 
-
+import SearchIcon from '@mui/icons-material/Search';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import { TableData, Column, FilterState } from "./types";
 import AttendanceTableHead from "./AttendanceTableHead";
 import AttendanceTableBody from "./AttendanceTableBody";
 import CalendarModal from "./CalendarModal";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";  
-
-import dayjs from "dayjs";
-import weekOfYear from "dayjs/plugin/weekOfYear";
-import customParseFormat from "dayjs/plugin/customParseFormat";
-import localizedFormat from "dayjs/plugin/localizedFormat";
-import isBetween from "dayjs/plugin/isBetween";
-import advancedFormat from "dayjs/plugin/advancedFormat";
-
-// Extend Day.js with the plugins
-dayjs.extend(weekOfYear);
-dayjs.extend(customParseFormat);
-dayjs.extend(localizedFormat);
-dayjs.extend(isBetween);
-dayjs.extend(advancedFormat);
+import axiosInstance from "../../../utils/libs/axios";
 
 interface AttendanceTableProps {
-  data: TableData[];
   columns: Column[];
   onEdit?: (item: TableData) => void;
-  onDelete?: (id: string) => void;
+  onDelete?: (id: number) => void;
   tableTitle?: string;
   showCalendar?: boolean;
 }
 
+// Function to format time from API format
+const formatTime = (timeString: string): string => {
+  const date = new Date(timeString);
+  return date.toTimeString().split(' ')[0]; // Returns time in HH:MM:SS format
+};
+
 const AttendanceTable: React.FC<AttendanceTableProps> = ({
-  data,
   columns,
   onEdit,
   onDelete,
   tableTitle,
   showCalendar = true,
 }) => {
+  const [data, setData] = useState<TableData[]>([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filters,   
- setFilters] = useState<FilterState>({});
+  const [filters, setFilters] = useState<FilterState>({});
   const [filteredData, setFilteredData] = useState<TableData[]>(data);
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [isCalendarOpen, setCalendarOpen] = useState(false);
+  const [pendingSearch, setPendingSearch] = useState("");
 
-  const filterData = () => {
+  useEffect(() => {
+    // Fetch data from API when component mounts
+    const fetchEmployeeData = async () => {
+      try {
+        const response = await axiosInstance().get('/attendance/list');
+
+        const formattedData = response.data.data.results.map((item: any) => ({
+          id: item.id,
+          department: item.department,
+          position: item.position,
+          employee_id: item.employee_id,
+          full_name: item.full_name,
+          status: item.status,
+          work_day: item.work_day,
+          come_time: formatTime(item.come_time), // Apply formatting
+          leave_time: formatTime(item.leave_time), // Apply formatting
+          total_hourse: item.total_hourse,
+        }));
+
+        setData(formattedData);
+        console.log(formattedData);
+
+      } catch (error) {
+        console.error('Ошибка при загрузке данных:', error);
+      }
+    };
+
+    fetchEmployeeData();
+  }, []);
+
+  useEffect(() => {
     const filtered = data.filter((row) => {
-      const matchesSearch =
-        row.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        row.id.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = 
+        row.full_name.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesFilters = Object.entries(filters).every(([key, value]) => {
         if (!value) return true;
-        return (
-          row[key as keyof TableData]?.toString().toLowerCase() ===
-          value.toLowerCase()
-        );
+        return row[key as keyof TableData]?.toString().toLowerCase() === value.toLowerCase();
       });
 
-      // Filter by date if a date is selected
-      const matchesDate = !selectedDate || dayjs(row.date).isSame(dayjs(selectedDate), 'day');
-
-      return matchesSearch && matchesFilters && matchesDate;
+      return matchesSearch && matchesFilters;
     });
 
     setFilteredData(filtered);
     setPage(0);
-  };
-
-  useEffect(() => {
-    filterData(); // Call filterData initially and whenever dependencies change
-  }, [data, searchTerm, filters, selectedDate]);
+  }, [data, searchTerm, filters]);
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setRowsPerPage(parseInt(event.target.value,   
- 10));
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
 
-  const handleSearch = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    filterData(); // Trigger filtering when the search button is clicked
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setPendingSearch(event.target.value);
+  };
+
+  const handleSearchSubmit = () => {
+    setSearchTerm(pendingSearch);
+  };
+
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      handleSearchSubmit();
+    }
   };
 
   const handleFilterChange = (columnId: string, value: string) => {
-    setFilters((prev) => ({
+    setFilters(prev => ({
       ...prev,
-      [columnId]: value,
+      [columnId]: value
     }));
   };
 
-
-  const capitalize = (str: string): string => {
-    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-  };
-
-  const handleStatusChange = (rowId: string, newStatus: string) => {
-    setFilteredData((prevData) =>
-      prevData.map((row) =>
-        row.id === rowId ? { ...row, status: capitalize(newStatus) } : row
-      )
-    );
-  };
-
   const handleCalendarOpen = () => {
-    setIsCalendarOpen(true);
+    setCalendarOpen(true);
   };
 
-  const handleCalendarClose = (selectedDate: Date | null) => {
-    console.log(selectedDate);
-    setIsCalendarOpen(false);
+  const handleCalendarClose = () => {
+    setCalendarOpen(false);
   };
 
   return (
     <Paper sx={{ width: "100%", overflow: "hidden", borderRadius: 4, mb: 5 }}>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          p: 2,
-        }}
-      >
-        <Typography variant="h6">
-          {tableTitle || "Attendance Overview"}
-        </Typography>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            width: "60%",
-          }}
-        >
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", p: 2}}>
+        <Typography variant="h6">{tableTitle || "Attendance Overview"}</Typography>
+        <Box sx={{ display: "flex", justifyContent: "space-between", }}>
+          {showCalendar && (
+            <IconButton onClick={handleCalendarOpen}>
+              <CalendarTodayIcon />
+            </IconButton>
+          )}
           <TextField
             variant="outlined"
             size="small"
             placeholder="Quick Search..."
-            value={searchTerm}
+            value={pendingSearch}
+            onChange={handleSearchChange}
+            onKeyPress={handleKeyPress}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -168,34 +159,19 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({
                 </InputAdornment>
               ),
             }}
-            sx={{ width: 300 }}
+            sx={{ width: '75%' }}
           />
-          {showCalendar && (
-            <IconButton onClick={() => setIsCalendarOpen(true)}>
-              <CalendarTodayIcon />
-            </IconButton>
-          )}
-          <Button
-            type="submit"
-            variant="contained"
-            onClick={handleSearch}
-            endIcon={<SearchIcon />}
-          >
+          <Button onClick={handleSearchSubmit} variant="contained" sx={{ ml: 1, width: '20%', bgcolor:'#111111', fontSize: '12px'}}>
             Search
           </Button>
         </Box>
       </Box>
       <TableContainer>
         <Table stickyHeader aria-label="sticky table">
-          <AttendanceTableHead
-            columns={columns}
-            filters={filters}
-            onFilterChange={handleFilterChange}
-          />
+          <AttendanceTableHead columns={columns} filters={filters} onFilterChange={handleFilterChange} />
           <AttendanceTableBody
             columns={columns}
             filteredData={filteredData}
-            onStatusChange={handleStatusChange}
             onEdit={onEdit}
             onDelete={onDelete}
           />
@@ -210,25 +186,9 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
       />
-      <Modal open={isCalendarOpen}>
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 400,
-            bgcolor: "background.paper",
-            p: 4,
-            borderRadius: 2,
-          }}
-        >
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <CalendarModal
-              open={isCalendarOpen}
-              onClose={handleCalendarClose}
-            />
-          </LocalizationProvider>
+      <Modal open={isCalendarOpen} onClose={handleCalendarClose}>
+        <Box sx={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: 400, bgcolor: "background.paper", p: 4, borderRadius: 2 }}>
+          <CalendarModal open={false} onClose={handleCalendarClose} />
         </Box>
       </Modal>
     </Paper>
