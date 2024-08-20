@@ -1,0 +1,115 @@
+import { useEffect, useRef, useState } from "react";
+import "../styles/QrStyles.css";
+import QrScanner from "qr-scanner";
+import QrFrame from "../assets/qr-frame.svg";
+import { Button } from "@mui/material";
+
+const QrReader = () => {
+  const scanner = useRef<QrScanner>();
+  const videoEl = useRef<HTMLVideoElement>(null);
+  const qrBoxEl = useRef<HTMLDivElement>(null);
+  const [qrOn, setQrOn] = useState<boolean>(true);
+  const [isPaused, setIsPaused] = useState<boolean>(false);
+
+  // Function to get geolocation
+  const getGeolocation = (): Promise<{ latitude: number; longitude: number }> => {
+    return new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          resolve({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          });
+        },
+        (error) => {
+          reject(error);
+        }
+      );
+    });
+  };
+
+  // Function to send data to the server
+  const sendDataToServer = async (employee_id: string) => {
+    try {
+      const { latitude, longitude } = await getGeolocation();
+
+      const payload = {
+        employee_id,
+        latitude,
+        longitude,
+      };
+
+      console.log("Sending data to server:", payload);
+
+      // Simulate server request
+      setTimeout(() => {
+        console.log("Server response: Успешно прошли");
+      }, 1000);
+
+      // Pause the scanner for 30 seconds
+      setIsPaused(true);
+      setTimeout(() => setIsPaused(false), 30000);
+    } catch (error) {
+      console.error("Error getting geolocation or sending data:", error);
+    }
+  };
+
+  // Success
+  const onScanSuccess = (result: QrScanner.ScanResult) => {
+    const employee_id = result.data;
+
+    if (result?.data && !isPaused) {
+      console.log("Scanned employee_id:", employee_id);
+      sendDataToServer(employee_id);
+    } else if (isPaused) {
+      alert("Scanner is paused. Please wait a moment.");
+    } else {
+      alert("This is not the correct QR code.");
+    }
+  };
+
+  // Fail
+  const onScanFail = (err: string | Error) => {
+    console.log(err);
+  };
+
+  useEffect(() => {
+    if (videoEl?.current && !scanner.current) {
+      scanner.current = new QrScanner(videoEl?.current, onScanSuccess, {
+        onDecodeError: onScanFail,
+        preferredCamera: "environment",
+        highlightScanRegion: true,
+        highlightCodeOutline: true,
+        overlay: qrBoxEl?.current || undefined,
+      });
+
+      scanner.current
+        .start()
+        .then(() => setQrOn(true))
+        .catch((err) => {
+          if (err) setQrOn(false);
+        });
+    }
+
+    return () => {
+      if (scanner.current) {
+        scanner.current.stop();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!qrOn)
+      alert(
+        "Camera is blocked or not accessible. Please allow camera in your browser permissions and Reload."
+      );
+  }, [qrOn]);
+
+  return (
+    <div className="qr-reader">
+      <video ref={videoEl}></video>
+    </div>
+  );
+};
+
+export default QrReader;
