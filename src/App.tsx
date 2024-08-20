@@ -9,7 +9,7 @@ import { Employee } from "./employees";
 import SideMenu from "./admin/components/SideMenu";
 import { Box, Grid } from "@mui/material";
 import "./shared/styles/App.css";
-// import QrReader from "./client/pages/QrReader";
+import QrReader from "./client/pages/QrReader";
 
 const theme = createTheme({
   palette: {
@@ -69,7 +69,7 @@ function App() {
                       <AdminDashboard />
                     }
             />
-            {/* <Route path="/qrreader" element={<QrReader />} /> */}
+            <Route path="/qrreader" element={<QrReader />} />
           </Routes>
         </Box>
       </BrowserRouter>
