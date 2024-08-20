@@ -59,7 +59,7 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json', // Убедитесь, что указали тип контента как JSON
         };
-        const response = await axiosInstance.get('/attendance/list', { headers });
+        const response = await axiosInstance().get('/attendance/list');
         
 
         const formattedData = response.data.data.results.map((item: any) => ({

@@ -59,7 +59,7 @@ const MainContent: React.FC<MainContentProps> = ({
 
   const fetchDashboardData = async () => {
     try {
-      const response = await axiosInstance.get<{ data: DashboardData, status: boolean }>('/user/dashboard');
+      const response = await axiosInstance().get<{ data: DashboardData, status: boolean }>('/user/dashboard');
       console.log('Ответ от сервера:', response);
       
       if (response.data.status) {
@@ -110,7 +110,7 @@ const MainContent: React.FC<MainContentProps> = ({
       const endpoint = type === 'checkIn' ? '/attendance/createbyphone' : '/attendance/exitbyphone';
   
       // Отправляем данные в теле запроса (body) с использованием PATCH
-      const response = await axiosInstance.post(endpoint, data, { headers });
+      const response = await axiosInstance().post(endpoint, data);
   
       console.log(`Ответ сервера (${type}):`, response.data);
       return response.data;
@@ -134,6 +134,7 @@ const MainContent: React.FC<MainContentProps> = ({
       };
   
       const token = localStorage.getItem('access_token');
+      
       const headers = {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json', // Убедитесь, что указали тип контента как JSON
@@ -147,7 +148,7 @@ const MainContent: React.FC<MainContentProps> = ({
       const endpoint = type === 'checkIn' ? '/attendance/createbyphone' : '/attendance/exitbyphone';
   
       // Отправляем данные в теле запроса (body) с использованием PATCH
-      const response = await axiosInstance.patch(endpoint, data, { headers });
+      const response = await axiosInstance().patch(endpoint, data);
   
       console.log(`Ответ сервера (${type}):`, response.data);
       return response.data;

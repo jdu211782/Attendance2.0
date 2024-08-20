@@ -1,25 +1,47 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import LineChartComponent from "../components/LineChart";
 import PieChartWithCustomizedLabel from "../components/pie";
 import SimpleBarChart from "../components/Bar";
 import AttendanceTable from "../components/Table/AttendanceTable";
-import mockData from "../components/Table/mockData";
 import { Column } from "../components/Table/types";
-
+import axiosInstance from '../../utils/libs/axios';
 
 function AdminDashboardContent() {
+  const [attendanceStats, setAttendanceStats] = useState({
+    total_employee: 0,
+    ontime: 0,
+    absent: 0,
+    late_arrival: 0,
+    early_departures: 0,
+    time_off: 0,
+  });
 
   const columns: Column[] = [
     { id: 'id', label: 'ID' },
-    { id: 'name', label: 'Name', filterable: true },
+    { id: 'full_name', label: 'Full Name', filterable: true },
     { id: 'department', label: 'Department', filterable: true, filterValues: ['IT', 'HR'] },
-    { id: 'role', label: 'Role', filterable: true, filterValues: ['Developer', 'Manager'] },
-    { id: 'date', label: 'Date' },
+    { id: 'position', label: 'Role', filterable: true, filterValues: ['Developer', 'Manager'] },
+    { id: 'work_day', label: 'Work day' },
     { id: 'status', label: 'Status', filterable: true, filterValues: ['Present', 'Absent'] },
-    { id: 'checkIn', label: 'Check In' },
-    { id: 'checkOut', label: 'Check Out' },
-    { id: 'totalHrs', label: 'Total Hours' },
+    { id: 'come_time', label: 'Check In' },
+    { id: 'leave_time', label: 'Check Out' },
+    { id: 'total_hourse', label: 'Total Hours' },
   ] as Column[];
+
+  useEffect(() => {
+    const fetchAttendanceStats = async () => {
+      try {
+        const response = await axiosInstance().get("/attendance");
+        if (response.status === 200 && response.data.status) {
+          setAttendanceStats(response.data.data);
+        }
+      } catch (err) {
+        console.error("Ошибка при получении данных o посещаемости:", err);
+      }
+    };
+
+    fetchAttendanceStats();
+  }, []);
   
   return (
     <>
@@ -31,7 +53,7 @@ function AdminDashboardContent() {
         <div className="Cards">
           <div className="Card">
             <div className="data">
-              <p className="Card-amount">452</p>
+              <p className="Card-amount">{attendanceStats.total_employee}</p>
               <p className="Card-text">Total employees</p>
             </div>
             <div className="icon">
@@ -40,7 +62,7 @@ function AdminDashboardContent() {
           </div>
           <div className="Card">
             <div className="data">
-              <p className="Card-amount">360</p>
+              <p className="Card-amount">{attendanceStats.ontime}</p>
               <p className="Card-text">On Time</p>
             </div>
             <div className="icon">
@@ -49,7 +71,7 @@ function AdminDashboardContent() {
           </div>
           <div className="Card">
             <div className="data">
-              <p className="Card-amount">30</p>
+              <p className="Card-amount">{attendanceStats.absent}</p>
               <p className="Card-text">Absent</p>
             </div>
             <div className="icon">
@@ -58,7 +80,7 @@ function AdminDashboardContent() {
           </div>
           <div className="Card">
             <div className="data">
-              <p className="Card-amount">62</p>
+              <p className="Card-amount">{attendanceStats.late_arrival}</p>
               <p className="Card-text">Late Arrival</p>
             </div>
             <div className="icon">
@@ -67,7 +89,7 @@ function AdminDashboardContent() {
           </div>
           <div className="Card">
             <div className="data">
-              <p className="Card-amount">6</p>
+              <p className="Card-amount">{attendanceStats.early_departures}</p>
               <p className="Card-text">Early Departures</p>
             </div>
             <div className="icon">
@@ -76,7 +98,7 @@ function AdminDashboardContent() {
           </div>
           <div className="Card">
             <div className="data">
-              <p className="Card-amount">42</p>
+              <p className="Card-amount">{attendanceStats.time_off}</p>
               <p className="Card-text">Time-off</p>
             </div>
             <div className="icon">
@@ -94,7 +116,7 @@ function AdminDashboardContent() {
         </div>
       </div>
       <div className="TableSection">
-        <AttendanceTable data={mockData} columns={columns} showCalendar={true}/>
+        <AttendanceTable columns={columns} showCalendar={true}/>
       </div>
     </>
   );
