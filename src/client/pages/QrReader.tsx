@@ -4,64 +4,96 @@ import QrScanner from "qr-scanner";
 import QrFrame from "../assets/qr-frame.svg";
 import { Button } from "@mui/material";
 
-
 const QrReader = () => {
   const scanner = useRef<QrScanner>();
   const videoEl = useRef<HTMLVideoElement>(null);
   const qrBoxEl = useRef<HTMLDivElement>(null);
   const [qrOn, setQrOn] = useState<boolean>(true);
+  const [isPaused, setIsPaused] = useState<boolean>(false);
 
+  // Function to get geolocation
+  const getGeolocation = (): Promise<{ latitude: number; longitude: number }> => {
+    return new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          resolve({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          });
+        },
+        (error) => {
+          reject(error);
+        }
+      );
+    });
+  };
+
+  // Function to send data to the server
+  const sendDataToServer = async (employee_id: string) => {
+    try {
+      const { latitude, longitude } = await getGeolocation();
+
+      const payload = {
+        employee_id,
+        latitude,
+        longitude,
+      };
+
+      console.log("Sending data to server:", payload);
+
+      // Simulate server request
+      setTimeout(() => {
+        console.log("Server response: Успешно прошли");
+      }, 1000);
+
+      // Pause the scanner for 30 seconds
+      setIsPaused(true);
+      setTimeout(() => setIsPaused(false), 30000);
+    } catch (error) {
+      console.error("Error getting geolocation or sending data:", error);
+    }
+  };
 
   // Success
   const onScanSuccess = (result: QrScanner.ScanResult) => {
+    const employee_id = result.data;
 
-    const user_id = result.data;
-    console.log(user_id);
-  
-      if (result?.data) {
-        alert(
-          user_id
-        );
-      } else {
-        alert("This is not the correct QR code.");
-      }
-    };
-
+    if (result?.data && !isPaused) {
+      console.log("Scanned employee_id:", employee_id);
+      sendDataToServer(employee_id);
+    } else if (isPaused) {
+      alert("Scanner is paused. Please wait a moment.");
+    } else {
+      alert("This is not the correct QR code.");
+    }
+  };
 
   // Fail
   const onScanFail = (err: string | Error) => {
-    // 🖨 Print the "err" to browser console.
     console.log(err);
   };
 
   useEffect(() => {
     if (videoEl?.current && !scanner.current) {
-      //  Instantiate the QR Scanner
       scanner.current = new QrScanner(videoEl?.current, onScanSuccess, {
         onDecodeError: onScanFail,
-        //  This is the camera facing mode. In mobile devices, "environment" means back camera and "user" means front camera.
         preferredCamera: "environment",
-        //  This will help us position our "QrFrame.svg" so that user can only scan when qr code is put in between our QrFrame.svg.
         highlightScanRegion: true,
-        //  This will produce a yellow (default color) outline around the qr code that we scan, showing a proof that our qr-scanner is scanning that qr code.
         highlightCodeOutline: true,
-        //  A custom div which will pair with "highlightScanRegion" option above 👆. This gives us full control over our scan region.
         overlay: qrBoxEl?.current || undefined,
       });
 
-      scanner?.current
-        ?.start()
+      scanner.current
+        .start()
         .then(() => setQrOn(true))
         .catch((err) => {
           if (err) setQrOn(false);
         });
     }
 
-    //  Clean up on unmount.
-    //  This removes the QR Scanner from rendering and using camera when it is closed or removed from the UI.
     return () => {
-      if (!videoEl?.current) {
-        scanner?.current?.stop();
+      if (scanner.current) {
+        scanner.current.stop();
       }
     };
   }, []);
@@ -74,9 +106,9 @@ const QrReader = () => {
   }, [qrOn]);
 
   return (
-      <div className="qr-reader">
-        <video ref={videoEl}></video>
-      </div>
+    <div className="qr-reader">
+      <video ref={videoEl}></video>
+    </div>
   );
 };
 
