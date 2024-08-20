@@ -1,6 +1,4 @@
 import axios from "axios";
-import EmployeeTable from "../../admin/components/Table/EmployeeTable";
-
 
 
 const axiosInstance = () => {
@@ -58,10 +56,10 @@ export const deletePosition = async (id: number) => {
 export const createUser = async (employee_id: string, password: string, role: string, full_name: string, department_id: number, position_id: number, phone: string, email: string) => {
   const response = await axiosInstance().post(`/user/create`, {employee_id, password, role, full_name, department_id, position_id, phone, email});
   return response.data;
-}
+};
 
 export const updateUser = async (id: number, employee_id: string, password: string, role: string, full_name: string, department_id: number, position_id: number, phone: string, email: string) => {
   const response = await axiosInstance().put(`/user/${id}`, {employee_id, password, role, full_name, department_id, position_id, phone, email});
   return response.data;
-}
+};
 
