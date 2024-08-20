@@ -47,7 +47,7 @@ const QrReader = () => {
         console.log("Server response: Успешно прошли");
       }, 1000);
     } catch (error) {
-      console.error("Error getting geolocation or sending data:", error);
+      console.error("Error getting geolocation or sanding data:", error);
     }
   };
 
