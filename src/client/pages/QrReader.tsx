@@ -10,6 +10,7 @@ const QrReader = () => {
   const qrBoxEl = useRef<HTMLDivElement>(null);
   const [qrOn, setQrOn] = useState<boolean>(true);
   const [isPaused, setIsPaused] = useState<boolean>(false);
+  const [pauseTimeoutId, setPauseTimeoutId] = useState<NodeJS.Timeout | null>(null);
 
   // Function to get geolocation
   const getGeolocation = (): Promise<{ latitude: number; longitude: number }> => {
@@ -45,10 +46,6 @@ const QrReader = () => {
       setTimeout(() => {
         console.log("Server response: Успешно прошли");
       }, 1000);
-
-      // Pause the scanner for 30 seconds
-      setIsPaused(true);
-      setTimeout(() => setIsPaused(false), 30000);
     } catch (error) {
       console.error("Error getting geolocation or sending data:", error);
     }
@@ -61,6 +58,14 @@ const QrReader = () => {
     if (result?.data && !isPaused) {
       console.log("Scanned employee_id:", employee_id);
       sendDataToServer(employee_id);
+      
+      // Set pause state to true and start a timer
+      setIsPaused(true);
+      if (pauseTimeoutId) {
+        clearTimeout(pauseTimeoutId); // Clear any existing timeout
+      }
+      const timeoutId = setTimeout(() => setIsPaused(false), 15000); // 15 seconds pause
+      setPauseTimeoutId(timeoutId);
     } else if (isPaused) {
       alert("Scanner is paused. Please wait a moment.");
     } else {
@@ -108,6 +113,9 @@ const QrReader = () => {
   return (
     <div className="qr-reader">
       <video ref={videoEl}></video>
+      <div className="qr-frame" ref={qrBoxEl}>
+        <img src={QrFrame} alt="QR Frame" />
+      </div>
     </div>
   );
 };
