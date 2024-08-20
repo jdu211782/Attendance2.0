@@ -67,7 +67,7 @@ const QrReader = () => {
       const timeoutId = setTimeout(() => setIsPaused(false), 15000); // 15 seconds pause
       setPauseTimeoutId(timeoutId);
     } else if (isPaused) {
-      alert("Scanner is paused. Please wait a moment.");
+      // Do nothing, scanner is paused
     } else {
       alert("This is not the correct QR code.");
     }
