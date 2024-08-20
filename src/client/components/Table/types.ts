@@ -7,15 +7,20 @@ export interface FilterState {
   }
 
   export interface TableData {
-    id: string;
+    id: number;
+    employee_id?: string;
+    password?: string;
+    role?: string;
     full_name: string;
     department: string;
+    department_id?: number;
     position?: string;
-    work_day?: DateOrString;
-    status?: string;
-    come_time?: DateOrString;
-    leave_time?: DateOrString;
-    total_hourse?: number;
+    position_id?: number;
+    date?: DateOrString;
+    status?: boolean;
+    checkIn?: DateOrString;
+    checkOut?: DateOrString;
+    totalHrs?: number;
     phone?: string;
     email?: string;
   }

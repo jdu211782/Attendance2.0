@@ -3,10 +3,12 @@ import { Box, Typography, Button, Divider } from '@mui/material';
 import { format } from 'date-fns';
 import AttendanceSummary from './AttendanceSummary';
 import TabsComponent from './TabsComponent';
-import AttendanceDataProvider from './Table/AttendanceDataProvider';
 import { Column } from './Table/types';
 import axiosInstance from '../../utils/libs/axios';
 import axios from 'axios';
+import AttendanceTable from './Table/AttendanceTable';
+
+
 
 interface MainContentProps {
   tabIndex: number;
@@ -38,6 +40,12 @@ const MainContent: React.FC<MainContentProps> = ({
   const [message, setMessage] = useState<string | null>(null);
   const [messageColor, setMessageColor] = useState<string>('#000'); // Черный по умолчанию
   const [currentTime, setCurrentTime] = useState<string>(format(new Date(), 'HH:mm:ss'));
+
+  const columns: Column[] = [
+    { id: 'id', label: 'ID' },
+    { id: 'full_name', label: 'Name', filterable: true },
+    { id: 'status', label: 'Status', filterable: true, filterValues: ['Present', 'Absent'] }
+  ] as Column[];
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -78,8 +86,8 @@ const MainContent: React.FC<MainContentProps> = ({
       }
     });
   };
-
-  const sendAttendanceData = async (type: 'checkIn' | 'checkOut') => {
+  
+  const sendComeData = async (type: 'checkIn' | 'checkOut') => {
     try {
       const position = await getCurrentPosition();
       const data = {
@@ -89,9 +97,9 @@ const MainContent: React.FC<MainContentProps> = ({
       };
   
       const token = localStorage.getItem('access_token');
-  
       const headers = {
         Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json', // Убедитесь, что указали тип контента как JSON
       };
   
       console.log('Отправляемые данные:', data);
@@ -99,13 +107,10 @@ const MainContent: React.FC<MainContentProps> = ({
       console.log('Токен авторизации:', token ? 'Присутствует' : 'Отсутствует');
       console.log('Заголовки запроса:', headers);
   
-      let response;
-      if (type === 'checkIn') {
-        response = await axiosInstance.post('/attendance/createbyphone', data, { headers });
-      } else {
-        // Логика для checkOut (отметки ухода)
-        response = await axiosInstance.post('/attendance/exitbyphone', data, { headers });
-      }
+      const endpoint = type === 'checkIn' ? '/attendance/createbyphone' : '/attendance/exitbyphone';
+  
+      // Отправляем данные в теле запроса (body) с использованием PATCH
+      const response = await axiosInstance.post(endpoint, data, { headers });
   
       console.log(`Ответ сервера (${type}):`, response.data);
       return response.data;
@@ -119,9 +124,49 @@ const MainContent: React.FC<MainContentProps> = ({
     }
   };
 
+  const sendLeaveData = async (type: 'checkIn' | 'checkOut') => {
+    try {
+      const position = await getCurrentPosition();
+      const data = {
+        employee_id: employeeId,
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+      };
+  
+      const token = localStorage.getItem('access_token');
+      const headers = {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json', // Убедитесь, что указали тип контента как JSON
+      };
+  
+      console.log('Отправляемые данные:', data);
+      console.log('URL запроса:', type === 'checkIn' ? '/attendance/createbyphone' : '/attendance/exitbyphone');
+      console.log('Токен авторизации:', token ? 'Присутствует' : 'Отсутствует');
+      console.log('Заголовки запроса:', headers);
+  
+      const endpoint = type === 'checkIn' ? '/attendance/createbyphone' : '/attendance/exitbyphone';
+  
+      // Отправляем данные в теле запроса (body) с использованием PATCH
+      const response = await axiosInstance.patch(endpoint, data, { headers });
+  
+      console.log(`Ответ сервера (${type}):`, response.data);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error(`Ошибка при отправке данных ${type}:`, error.response?.data || error.message);
+      } else {
+        console.error(`Неизвестная ошибка при отправке данных ${type}:`, error);
+      }
+      throw error;
+    }
+  };
+  
+  
+  
+
   const handleComeClick = async () => {
     try {
-      const result = await sendAttendanceData('checkIn');
+      const result = await sendComeData('checkIn');
       if (result.status) {
         setCheckInTime(result.data.come_time);
         setMessage(`Добро пожаловать! Вы отметились в ${result.data.come_time}`);
@@ -149,7 +194,7 @@ const MainContent: React.FC<MainContentProps> = ({
   const handleLeaveClick = async () => {
     if (checkInTime !== '--:--') {
       try {
-        const result = await sendAttendanceData('checkOut');
+        const result = await sendLeaveData('checkOut');
         if (result.status) {
           setCheckOutTime(result.data.leave_time);
           setMessage(`До свидания! Вы отметились в ${result.data.leave_time}`);
@@ -257,11 +302,11 @@ const MainContent: React.FC<MainContentProps> = ({
         </>
       )}
 
-      {tabIndex === 1 && <AttendanceSummary attendanceSummary={attendanceSummary} />}
+      {tabIndex === 1 && <AttendanceSummary attendanceSummary={attendanceSummary}/>}
 
       {tabIndex === 2 && (
         <Box sx={{ overflowX: 'auto' }}>
-          <AttendanceDataProvider />
+          <AttendanceTable columns={columns} showCalendar={false} tableTitle=' '/>
         </Box>
       )}
     </Box>
