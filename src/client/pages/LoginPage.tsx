@@ -17,7 +17,7 @@ interface LoginPageProps {
 }
 
 const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
-  const [employeeId, setEmployeeId] = useState('');
+  const [employee_id, setEmployeeId] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -27,15 +27,15 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
     e.preventDefault();
     setError('');
 
-    if (!employeeId || !password) {
+    if (!employee_id || !password) {
       setError('Please fill in all fields');
       return;
     }
 
     try {
-      console.log('Попытка входа c ID:', employeeId);
+      console.log('Попытка входа c ID:', employee_id);
       const response = await axiosInstance.post("/sign-in", {
-        employee_id: employeeId,
+        employee_id: employee_id,
         password: password,
       });
 
@@ -50,7 +50,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         console.log('Токены сохранены в localStorage');
 
         const tempEmployeeData: Employee = {
-          id: employeeId,
+          id: employee_id,
           username: response.data.employee_id || 'Unknown',
           password: '',
           role: response.data.data.role || 'employee',
@@ -141,7 +141,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             name="employee_id"
             autoComplete="employee_id"
             autoFocus
-            value={employeeId}
+            value={employee_id}
             onChange={(e) => setEmployeeId(e.target.value)}
           />
           <TextField

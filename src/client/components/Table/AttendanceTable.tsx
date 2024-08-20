@@ -18,41 +18,78 @@ import { TableData, Column, FilterState } from "./types";
 import AttendanceTableHead from "./AttendanceTableHead";
 import AttendanceTableBody from "./AttendanceTableBody";
 import CalendarModal from "./CalendarModal";
+import axiosInstance from "../../../utils/libs/axios";
 
 interface AttendanceTableProps {
   columns: Column[];
-  data: TableData[];
   onEdit?: (item: TableData) => void;
-  onDelete?: (id: string) => void;
+  onDelete?: (id: number) => void;
   tableTitle?: string;
   showCalendar?: boolean;
-  isLoading: boolean;
-  error: string | null;
 }
+
+// Function to format time from API format
+const formatTime = (timeString: string): string => {
+  const date = new Date(timeString);
+  return date.toTimeString().split(' ')[0]; // Returns time in HH:MM:SS format
+};
 
 const AttendanceTable: React.FC<AttendanceTableProps> = ({
   columns,
-  data,
   onEdit,
   onDelete,
   tableTitle,
   showCalendar = true,
-  isLoading,
-  error
 }) => {
+  const [data, setData] = useState<TableData[]>([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState<FilterState>({});
-  const [filteredData, setFilteredData] = useState<TableData[]>([]);
+  const [filteredData, setFilteredData] = useState<TableData[]>(data);
   const [isCalendarOpen, setCalendarOpen] = useState(false);
   const [pendingSearch, setPendingSearch] = useState("");
 
   useEffect(() => {
+    // Fetch data from API when component mounts
+    const fetchEmployeeData = async () => {
+      try {
+        const token = localStorage.getItem('access_token');
+        const headers = {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json', // Убедитесь, что указали тип контента как JSON
+        };
+        const response = await axiosInstance.get('/attendance/list', { headers });
+        
+
+        const formattedData = response.data.data.results.map((item: any) => ({
+          id: item.id,
+          department: item.department,
+          position: item.position,
+          employee_id: item.employee_id,
+          full_name: item.full_name,
+          status: item.status,
+          work_day: item.work_day,
+          come_time: formatTime(item.come_time), // Apply formatting
+          leave_time: formatTime(item.leave_time), // Apply formatting
+          total_hourse: item.total_hourse,
+        }));
+
+        setData(formattedData);
+        console.log(formattedData);
+
+      } catch (error) {
+        console.error('Ошибка при загрузке данных:', error);
+      }
+    };
+
+    fetchEmployeeData();
+  }, []);
+
+  useEffect(() => {
     const filtered = data.filter((row) => {
       const matchesSearch = 
-        row.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        row.id.toLowerCase().includes(searchTerm.toLowerCase());
+        row.full_name.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesFilters = Object.entries(filters).every(([key, value]) => {
         if (!value) return true;
@@ -104,14 +141,6 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({
     setCalendarOpen(false);
   };
 
-  if (error) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
-        <Typography color="error">{error}</Typography>
-      </Box>
-    );
-  }
-
   return (
     <Paper sx={{ width: "100%", overflow: "hidden", borderRadius: 4, mb: 5 }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", p: 2}}>
@@ -148,18 +177,12 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({
           <AttendanceTableHead columns={columns} filters={filters} onFilterChange={handleFilterChange} />
           <AttendanceTableBody
             columns={columns}
-            filteredData={filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)}
-            onStatusChange={(rowId, newStatus) => {}}
+            filteredData={filteredData}
             onEdit={onEdit}
             onDelete={onDelete}
           />
         </Table>
       </TableContainer>
-      {/* {filteredData.length === 0 && !isLoading && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
-          <Typography>No data available</Typography>
-        </Box>
-      )} */}
       <TablePagination
         rowsPerPageOptions={[10, 25, 100]}
         component="div"
@@ -171,7 +194,7 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({
       />
       <Modal open={isCalendarOpen} onClose={handleCalendarClose}>
         <Box sx={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: 400, bgcolor: "background.paper", p: 4, borderRadius: 2 }}>
-          <CalendarModal onClose={handleCalendarClose} />
+          <CalendarModal open={false} onClose={handleCalendarClose} />
         </Box>
       </Modal>
     </Paper>

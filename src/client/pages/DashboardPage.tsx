@@ -1,21 +1,21 @@
+// DashboardPage.tsx
+
 import React, { useState } from 'react';
 import { Container, Box } from '@mui/material';
 import Header from '../components/Header';
 import MainContent from '../components/MainContent';
 import '@fontsource/poppins/500.css';
 import { Employee } from '../../employees';
-import { Column, TableData } from "../components/Table/types";
-// import mockData from '../components/Table/mockData';
+import { Column } from "../components/Table/types";
 
 interface DashboardPageProps {
-  employeeData: Employee | null; // Добавлен тип null, чтобы учитывать отсутствие данных
+  employeeData: Employee | null;
   onLogout: () => void;
 }
 
 // Пример данных для колонок
 const columns: Column[] = [
   { id: 'id', label: 'ID' },
-  { id: 'name', label: 'Name', filterable: true },
   { id: 'status', label: 'Status', filterable: true, filterValues: ['Present', 'Absent', 'Excused Absence'] },
 ];
 
@@ -24,10 +24,10 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ employeeData, onLogout })
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   if (!employeeData) {
-    return <div>Загрузка данных сотрудника...</div>; // Сообщение для состояния загрузки
+    return <div>Загрузка данных сотрудника...</div>;
   }
 
-  if (!employeeData.username) {
+  if (!employeeData.id) {
     return <div>Данные сотрудника не найдены.</div>;
   }
 
@@ -59,7 +59,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ employeeData, onLogout })
     >
       <Header
         onLogout={onLogout}
-        employeeName={employeeData.username}
+        employeeId={employeeData.id} // Изменено на employeeId
         anchorEl={anchorEl}
         handleMenuOpen={handleMenuOpen}
         handleMenuClose={handleMenuClose}
@@ -70,7 +70,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ employeeData, onLogout })
           handleTabChange={handleTabChange}
           attendanceSummary={employeeData.attendanceSummary}
           employeeId={employeeData.id}
-          username={employeeData.username}
+          username={employeeData.username} // Этот пропс можно удалить из MainContent, если он не используется
           tableColumns={columns}
         />
       </Box>
