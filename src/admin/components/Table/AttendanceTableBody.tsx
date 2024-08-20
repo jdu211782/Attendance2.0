@@ -5,14 +5,16 @@ import { TableData, Column, DateOrString } from "./types";
 interface AttendanceTableBodyProps {
   columns: Column[];
   filteredData: TableData[];
-  onStatusChange: (rowId: string, newStatus: string) => void;
   onEdit?: (item: TableData) => void;
-  onDelete?: (id: string) => void;
+  onDelete?: (id: number) => void;
 }
 
-const formatValue = (value: DateOrString, key?: string): string => {
-  if (value === undefined) {
+const formatValue = (value: DateOrString | boolean, key?: string): string => {
+  if (value === undefined || value === null) {
     return '';
+  }
+  if (typeof value === 'boolean') {
+    return value ? 'Present' : 'Absent';
   }
   if (value instanceof Date) {
     if (key === 'date') {
@@ -28,38 +30,22 @@ const formatValue = (value: DateOrString, key?: string): string => {
   return value;
 };
 
-const capitalize = (str: string): string => {
-  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-};
-
-const getStatusStyles = (status: string): { backgroundColor: string; color: string } => {
-  switch (status.toLowerCase()) {
-    case 'present':
-      return { backgroundColor: '#e6effc', color: '#0764e6' };
-    case 'absent':
-      return { backgroundColor: '#ffe5ee', color: '#aa0000' };
-    case 'late arrival':
-      return { backgroundColor: '#fff8e7', color: '#d5b500' };
-    case 'work from home':
-      return { backgroundColor: '#E0FFC6', color: '#112A46' };
-    case 'excused absence':
-      return { backgroundColor: '#efefef', color: '#8a8a8a' };
-    default:
-      return { backgroundColor: '#fff', color: '#000' };
-  }
+const getStatusStyles = (status: boolean): { backgroundColor: string; color: string } => {
+  return status
+    ? { backgroundColor: '#e6effc', color: '#0764e6' }
+    : { backgroundColor: '#ffe5ee', color: '#aa0000' };
 };
 
 const AttendanceTableBody: React.FC<AttendanceTableBodyProps> = ({ 
   columns, 
   filteredData, 
-  onStatusChange, 
   onEdit, 
   onDelete 
 }) => {
-  const [editingRowId, setEditingRowId] = useState<string | null>(null);
+  const [editingRowId, setEditingRowId] = useState<number | null>(null);
 
-  const handleStatusChange = (rowId: string, newStatus: string) => {
-    onStatusChange(rowId, newStatus);
+  const handleStatusChange = (rowId: number, newStatus: string) => {
+    // onStatusChange(rowId, newStatus);
     setEditingRowId(null);
   };
 
@@ -78,7 +64,12 @@ const AttendanceTableBody: React.FC<AttendanceTableBodyProps> = ({
                       </Button>
                     )}
                     {onDelete && (
-                      <Button onClick={() => onDelete(row.id)} variant="outlined" size="small" color="error">
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        color="error"
+                        onClick={() => onDelete(row.id)}
+                      >
                         Delete
                       </Button>
                     )}
@@ -88,16 +79,16 @@ const AttendanceTableBody: React.FC<AttendanceTableBodyProps> = ({
             }
 
             const value = row[column.id as keyof TableData];
-            const { backgroundColor, color } = column.id === 'status' && value !== undefined 
-              ? getStatusStyles(value as string) 
+            const { backgroundColor, color } = column.id === 'status' && typeof value === 'boolean'
+              ? getStatusStyles(value as boolean)
               : { backgroundColor: '#fff', color: '#000' };
-            
+
             return (
               <TableCell key={column.id} sx={{ padding: '8px 16px' }}>
                 {column.id === 'status' && value !== undefined ? (
                   editingRowId === row.id ? (
                     <Select
-                      value={value as string}
+                      value={value.toString()} // Convert boolean to string for the select value
                       onChange={(e: SelectChangeEvent<string>) => handleStatusChange(row.id, e.target.value)}
                       displayEmpty
                       sx={{
@@ -112,8 +103,11 @@ const AttendanceTableBody: React.FC<AttendanceTableBodyProps> = ({
                         justifyContent: 'center',
                       }}
                     >
-                      {['Present', 'Absent','Excused Absence'].map((status) => (
-                        <MenuItem key={status} value={status}>{status}</MenuItem>
+                      {[
+                        { label: 'Present', value: 'true' },
+                        { label: 'Absent', value: 'false' },
+                      ].map(({ label, value }) => (
+                        <MenuItem key={value} value={value}>{label}</MenuItem>
                       ))}
                     </Select>
                   ) : (
@@ -131,7 +125,7 @@ const AttendanceTableBody: React.FC<AttendanceTableBodyProps> = ({
                       }}
                       onClick={() => setEditingRowId(row.id)}
                     >
-                      {capitalize(value as string)}
+                      {formatValue(value, column.id)}
                     </Box>
                   )
                 ) : (
