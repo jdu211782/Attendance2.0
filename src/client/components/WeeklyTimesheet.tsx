@@ -94,10 +94,6 @@ const WeeklyTimesheet: React.FC<WeeklyTimesheetProps> = ({ year, month }) => {
       .sort((a, b) => a.work_day.localeCompare(b.work_day));
   }, [timesheetData, selectedInterval]);
 
-  if (!timesheetData) {
-    return <Typography>Loading...</Typography>;
-  }
-
   return (
     <Box sx={{ mb: 3, mt: 3, backgroundColor: '#ffffff', borderRadius: 2, overflow: 'hidden', boxShadow: 1, p: 1 }}>
       <Box sx={{
@@ -136,53 +132,59 @@ const WeeklyTimesheet: React.FC<WeeklyTimesheetProps> = ({ year, month }) => {
         </FormControl>
       </Box>
       <Grid container spacing={1}>
-        {selectedDays.map((day) => {
-          const weekday = getWeekday(day.work_day);
-          const checkInColor = getTimeColor(day.come_time, true, isWeekend(weekday));
-          const checkOutColor = getTimeColor(day.leave_time, false, isWeekend(weekday));
-          const totalHoursColor = getTotalHoursColor(day.total_hours, isWeekend(weekday));
-          
-          return (
-            <Grid item xs={12} key={day.work_day}>
-              <Box sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                backgroundColor: '#ffffff',
-                borderTopLeftRadius: 0,
-                borderTopRightRadius: 0,
-                borderBottomLeftRadius: 3,
-                borderBottomRightRadius: 3,
-                p: 1,
-                boxShadow: 1,
-              }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '60px' }}>
-                  <Typography variant="body2" sx={{ fontSize: '12px' }}>
-                    {formatDay(day.work_day)} {weekday}
-                  </Typography>
+        {selectedDays.length > 0 ? (
+          selectedDays.map((day) => {
+            const weekday = getWeekday(day.work_day);
+            const checkInColor = getTimeColor(day.come_time, true, isWeekend(weekday));
+            const checkOutColor = getTimeColor(day.leave_time, false, isWeekend(weekday));
+            const totalHoursColor = getTotalHoursColor(day.total_hours, isWeekend(weekday));
+
+            return (
+              <Grid item xs={12} key={day.work_day}>
+                <Box sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  backgroundColor: '#ffffff',
+                  borderTopLeftRadius: 0,
+                  borderTopRightRadius: 0,
+                  borderBottomLeftRadius: 3,
+                  borderBottomRightRadius: 3,
+                  p: 1,
+                  boxShadow: 1,
+                }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '60px' }}>
+                    <Typography variant="body2" sx={{ fontSize: '12px' }}>
+                      {formatDay(day.work_day)} {weekday}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <AccessTimeIcon style={{ marginRight: '4px', color: checkInColor }} />
+                    <Typography variant="body2" style={{ color: checkInColor, fontSize: '12px' }}>
+                      {day.come_time || '--:--'}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <ExitToAppIcon style={{ marginRight: '4px', color: checkOutColor }} />
+                    <Typography variant="body2" style={{ color: checkOutColor, fontSize: '12px' }}>
+                      {day.leave_time || '--:--'}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <TimelapseIcon style={{ marginRight: '4px', color: totalHoursColor }} />
+                    <Typography variant="body2" style={{ color: totalHoursColor, fontSize: '12px' }}>
+                      {day.total_hours || '--:--'}
+                    </Typography>
+                  </Box>
                 </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <AccessTimeIcon style={{ marginRight: '4px', color: checkInColor }} />
-                  <Typography variant="body2" style={{ color: checkInColor, fontSize: '12px' }}>
-                    {day.come_time || '--:--'}
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <ExitToAppIcon style={{ marginRight: '4px', color: checkOutColor }} />
-                  <Typography variant="body2" style={{ color: checkOutColor, fontSize: '12px' }}>
-                    {day.leave_time || '--:--'}
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <TimelapseIcon style={{ marginRight: '4px', color: totalHoursColor }} />
-                  <Typography variant="body2" style={{ color: totalHoursColor, fontSize: '12px' }}>
-                    {day.total_hours || '--:--'}
-                  </Typography>
-                </Box>
-              </Box>
-            </Grid>
-          );
-        })}
+              </Grid>
+            );
+          })
+        ) : (
+          <Grid item xs={12}>
+            <Typography variant="body2">No data available for this interval.</Typography>
+          </Grid>
+        )}
       </Grid>
     </Box>
   );

@@ -10,7 +10,7 @@ interface CreateEmployeeModalProps {
 
 const CreateEmployeeModal: React.FC<CreateEmployeeModalProps> = ({ open, onClose, onSave }) => {
   const [newEmployee, setNewEmployee] = useState<Partial<TableData>>({
-    role: '',
+    position: '',
     department: ''
   });
 
@@ -50,7 +50,7 @@ const CreateEmployeeModal: React.FC<CreateEmployeeModalProps> = ({ open, onClose
             margin="normal"
             name="name"
             label="Name"
-            value={newEmployee.name || ''}
+            value={newEmployee.full_name || ''}
             onChange={handleInputChange}
           />
           <FormControl fullWidth margin="normal">
@@ -68,10 +68,10 @@ const CreateEmployeeModal: React.FC<CreateEmployeeModalProps> = ({ open, onClose
             </Select>
           </FormControl>
           <FormControl fullWidth margin="normal">
-            <InputLabel shrink={Boolean(newEmployee.role)}>Role</InputLabel>
+            <InputLabel shrink={Boolean(newEmployee.position)}>Position</InputLabel>
             <Select
-              name="role"
-              value={newEmployee.role || ''}
+              name="Position"
+              value={newEmployee.position || ''}
               onChange={handleSelectChange}
             >
               <MenuItem value=""><em>None</em></MenuItem>

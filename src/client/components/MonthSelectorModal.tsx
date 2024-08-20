@@ -24,49 +24,46 @@ const years = [2024, 2023, 2022, 2021]; // Добавьте нужные год�
 const MonthSelectorModal: React.FC<MonthSelectorModalProps> = ({ open, onClose, selectedMonth, onMonthChange, selectedYear, onYearChange }) => {
   return (
     <Modal
-      open={open} // Управляет видимостью модального окна
-      onClose={onClose} // Закрывает модальное окно при клике вне его области
-      sx={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-end' }} // Центрирование модального окна по горизонтали и выравнивание по нижнему краю
+      open={open}
+      onClose={onClose}
+      sx={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-end' }}
     >
       <Box
         sx={{
-          width: '90%', // Ширина модального окна в процентах от ширины экрана
-          maxWidth: 400, // Максимальная ширина
-          height: '60%', // Высота модального окна
-          bgcolor: 'background.paper', // Фоновый цвет модального окна
-          borderRadius: 2, // Радиус скругления углов
-          p: 2, // Внутренний отступ
-          overflowY: 'auto', // Скроллинг по вертикали, если содержимое выходит за пределы модального окна
-          position: 'relative', // Относительное позиционирование для иконки закрытия
+          width: '90%',
+          maxWidth: 400,
+          height: '60%',
+          bgcolor: 'background.paper',
+          borderRadius: 2,
+          p: 2,
+          overflowY: 'auto',
+          position: 'relative',
           display: 'flex',
-          flexDirection: 'column', // Вертикальное выравнивание содержимого
+          flexDirection: 'column',
         }}
       >
-        {/* Иконка закрытия модального окна */}
         <IconButton
-          onClick={onClose} // Закрывает модальное окно при нажатии
+          onClick={onClose}
           sx={{
-            position: 'absolute', // Абсолютное позиционирование для иконки закрытия
-            top: 8, // Отступ сверху
-            right: 8, // Отступ справа
-            color: '#105f82' // Цвет иконки
+            position: 'absolute',
+            top: 8,
+            right: 8,
+            color: '#105f82'
           }}
         >
           <CloseIcon />
         </IconButton>
-        
-        {/* Заголовок модального окна */}
+
         <Typography variant="h6" sx={{ mb: 2 }}>
           Select month and year
         </Typography>
-        
-        {/* Выпадающий список для выбора года */}
+
         <Box sx={{ mb: 2 }}>
           <Select
-            value={selectedYear} // Значение выбранного года
-            onChange={onYearChange} // Обработчик изменения года
-            fullWidth // Занимает всю доступную ширину
-            displayEmpty // Показывает пустое значение, если не выбрано ничего
+            value={selectedYear}
+            onChange={onYearChange}
+            fullWidth
+            displayEmpty
           >
             {years.map(year => (
               <MenuItem key={year} value={year}>
@@ -76,23 +73,22 @@ const MonthSelectorModal: React.FC<MonthSelectorModalProps> = ({ open, onClose, 
           </Select>
         </Box>
 
-        {/* Список месяцев */}
         <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 1 }}>
           {months.map((month, index) => (
             <Box
               key={index}
               sx={{
-                p: 1, // Внутренний отступ
-                borderRadius: 1, // Радиус скругления углов
-                bgcolor: '#f0f0f0', // Фоновый цвет элемента
-                cursor: 'pointer', // Курсор в виде указателя при наведении
-                textAlign: 'left', // Выравнивание текста по левому краю
+                p: 1,
+                borderRadius: 1,
+                bgcolor: '#f0f0f0',
+                cursor: 'pointer',
+                textAlign: 'left',
                 '&:hover': {
-                  bgcolor: '#e0e0e0' // Цвет фона при наведении
+                  bgcolor: '#e0e0e0'
                 },
-                backgroundColor: selectedMonth === index ? '#d0d0d0' : '#f0f0f0' // Цвет фона выбранного месяца
+                backgroundColor: selectedMonth === index + 1 ? '#d0d0d0' : '#f0f0f0' // Сравниваем с index + 1
               }}
-              onClick={() => onMonthChange({ target: { value: index } } as SelectChangeEvent<number>)}
+              onClick={() => onMonthChange({ target: { value: index + 1 } } as SelectChangeEvent<number>)} // Добавляем 1 к индексу месяца
             >
               {month} 
             </Box>

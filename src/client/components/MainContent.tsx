@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button, Divider } from '@mui/material';
-import { format, intervalToDuration } from 'date-fns';
+import { format } from 'date-fns';
 import AttendanceSummary from './AttendanceSummary';
 import TabsComponent from './TabsComponent';
 import AttendanceDataProvider from './Table/AttendanceDataProvider';
 import { Column } from './Table/types';
 import axiosInstance from '../../utils/libs/axios';
+import axios from 'axios';
 
 interface MainContentProps {
   tabIndex: number;
@@ -14,7 +15,7 @@ interface MainContentProps {
     [key: string]: number;
   };
   employeeId: string;
-  username: string;
+  username: string; // Добавляем это свойство
   tableColumns: Column[];
 }
 
@@ -35,6 +36,7 @@ const MainContent: React.FC<MainContentProps> = ({
   const [checkOutTime, setCheckOutTime] = useState<string>('--:--');
   const [totalHours, setTotalHours] = useState<string>('--:--');
   const [message, setMessage] = useState<string | null>(null);
+  const [messageColor, setMessageColor] = useState<string>('#000'); // Черный по умолчанию
   const [currentTime, setCurrentTime] = useState<string>(format(new Date(), 'HH:mm:ss'));
 
   useEffect(() => {
@@ -84,41 +86,86 @@ const MainContent: React.FC<MainContentProps> = ({
         employee_id: employeeId,
         latitude: position.coords.latitude,
         longitude: position.coords.longitude,
-        type,
       };
-
-      await axiosInstance.post('/attendance', data);
-      console.log(`Данные ${type} успешно отправлены`);
-      fetchDashboardData(); // Обновляем данные после отправки
+  
+      const token = localStorage.getItem('access_token');
+  
+      const headers = {
+        Authorization: `Bearer ${token}`,
+      };
+  
+      console.log('Отправляемые данные:', data);
+      console.log('URL запроса:', type === 'checkIn' ? '/attendance/createbyphone' : '/attendance/exitbyphone');
+      console.log('Токен авторизации:', token ? 'Присутствует' : 'Отсутствует');
+      console.log('Заголовки запроса:', headers);
+  
+      let response;
+      if (type === 'checkIn') {
+        response = await axiosInstance.post('/attendance/createbyphone', data, { headers });
+      } else {
+        // Логика для checkOut (отметки ухода)
+        response = await axiosInstance.post('/attendance/exitbyphone', data, { headers });
+      }
+  
+      console.log(`Ответ сервера (${type}):`, response.data);
+      return response.data;
     } catch (error) {
-      console.error(`Ошибка при отправке данных ${type}:`, error);
+      if (axios.isAxiosError(error)) {
+        console.error(`Ошибка при отправке данных ${type}:`, error.response?.data || error.message);
+      } else {
+        console.error(`Неизвестная ошибка при отправке данных ${type}:`, error);
+      }
       throw error;
     }
   };
 
   const handleComeClick = async () => {
     try {
-      await sendAttendanceData('checkIn');
-      await fetchDashboardData(); // Обновляем данные после отправки
-      setMessage(`Добро пожаловать! Вы отметились в ${checkInTime}`);
+      const result = await sendAttendanceData('checkIn');
+      if (result.status) {
+        setCheckInTime(result.data.come_time);
+        setMessage(`Добро пожаловать! Вы отметились в ${result.data.come_time}`);
+        setMessageColor('#000'); // Черный для успешного сообщения
+      } else {
+        setMessage(result.error || 'Произошла ошибка при отметке прихода.');
+        setMessageColor(result.error === 'distance from office is greater than office radius' ? '#ff0000' : '#000'); // Красный для определенной ошибки
+      }
     } catch (error) {
-      console.error('Ошибка при отметке прихода:', error);
-      setMessage('Ошибка при отметке прихода. Пожалуйста, проверьте разрешения на геолокацию и попробуйте снова.');
+      if (axios.isAxiosError(error) && error.response) {
+        if (error.response.status === 401) {
+          setMessage('Ошибка аутентификации. Пожалуйста, войдите в систему заново.');
+          setMessageColor('#ff0000'); // Красный для ошибки аутентификации
+        } else {
+          setMessage(error.response.data.error || 'Произошла ошибка при отметке прихода.');
+          setMessageColor('#ff0000'); // Красный для других ошибок
+        }
+      } else {
+        setMessage('Ошибка при отметке прихода. Пожалуйста, проверьте разрешения на геолокацию и попробуйте снова.');
+        setMessageColor('#ff0000'); // Красный для непредвиденной ошибки
+      }
     }
   };
-  
+
   const handleLeaveClick = async () => {
     if (checkInTime !== '--:--') {
       try {
-        await sendAttendanceData('checkOut');
-        await fetchDashboardData(); // Обновляем данные после отправки
-        setMessage(`До свидания! Вы отметились в ${checkOutTime}`);
+        const result = await sendAttendanceData('checkOut');
+        if (result.status) {
+          setCheckOutTime(result.data.leave_time);
+          setMessage(`До свидания! Вы отметились в ${result.data.leave_time}`);
+          setMessageColor('#000'); // Черный для успешного сообщения
+        } else {
+          setMessage(result.error || 'Произошла ошибка при отметке ухода.');
+          setMessageColor(result.error === 'distance from office is greater than office radius' ? '#ff0000' : '#000'); // Красный для определенной ошибки
+        }
       } catch (error) {
         console.error('Ошибка при отметке ухода:', error);
         setMessage('Ошибка при отметке ухода. Пожалуйста, проверьте разрешения на геолокацию и попробуйте снова.');
+        setMessageColor('#ff0000'); // Красный для ошибки
       }
     } else {
       setMessage('Сначала нужно отметить приход!');
+      setMessageColor('#ff0000'); // Красный для предупреждения
     }
   };
 
@@ -203,7 +250,7 @@ const MainContent: React.FC<MainContentProps> = ({
             </Button>
           </Box>
           {message && (
-            <Typography variant="body1" align="center" sx={{ mt: 2, color: '#1cbeca' }}>
+            <Typography variant="body1" align="center" sx={{ mt: 2, color: messageColor }}>
               {message}
             </Typography>
           )}

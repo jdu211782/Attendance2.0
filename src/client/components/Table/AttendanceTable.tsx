@@ -51,7 +51,7 @@ const AttendanceTable: React.FC<AttendanceTableProps> = ({
   useEffect(() => {
     const filtered = data.filter((row) => {
       const matchesSearch = 
-        row.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        row.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         row.id.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesFilters = Object.entries(filters).every(([key, value]) => {

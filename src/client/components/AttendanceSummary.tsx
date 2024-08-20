@@ -57,20 +57,25 @@ const AttendanceSummary: React.FC<AttendanceSummaryProps> = ({ attendanceSummary
     setSelectedYear(event.target.value as number);
   };
 
-  useEffect(() => {
-    const fetchMonthlyData = async () => {
-      try {
-        const data = await getMonthlyAttendanceData(selectedYear, selectedMonth);
-        if (data && data.data && data.data.results) {
-          setMonthlyData(data.data.results);
-        }
-      } catch (error) {
-        console.error('Ошибка при загрузке месячных данных:', error);
-      }
-    };
+useEffect(() => {
+  const fetchMonthlyData = async () => {
+    try {
+      const data = await getMonthlyAttendanceData(selectedYear, selectedMonth);
 
-    fetchMonthlyData();
-  }, [selectedYear, selectedMonth]);
+      // Преобразование null в 0 и приведение типов
+      const processedData: { [key: string]: number } = Object.fromEntries(
+        Object.entries(data.data.results || {}).map(([key, value]) => [key, typeof value === 'number' ? value : 0])
+      );
+
+      setMonthlyData(processedData);
+    } catch (error) {
+      console.error('Ошибка при загрузке месячных данных:', error);
+    }
+  };
+
+  fetchMonthlyData();
+}, [selectedYear, selectedMonth]);
+
 
   return (
     <Box sx={{ p: 3, borderRadius: 4, backgroundColor: '#ffffff', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>

@@ -54,7 +54,7 @@ const EditModal: React.FC<EditModalProps> = ({ open, data, onClose, onSave }) =>
         <TextField
           label="Name"
           name="name"
-          value={formData.name}
+          value={formData.full_name}
           onChange={handleInputChange}
           fullWidth
           margin="normal"
@@ -74,10 +74,10 @@ const EditModal: React.FC<EditModalProps> = ({ open, data, onClose, onSave }) =>
           </Select>
         </FormControl>
         <FormControl fullWidth margin="normal">
-          <InputLabel shrink={Boolean(formData.role)}>Role</InputLabel>
+          <InputLabel shrink={Boolean(formData.position)}>Role</InputLabel>
           <Select
-            name="role"
-            value={formData.role}
+            name="position"
+            value={formData.position}
             onChange={handleSelectChange}
           >
             <MenuItem value=""><em>None</em></MenuItem>

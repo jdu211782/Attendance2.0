@@ -5,14 +5,14 @@ import { Typography, Box, IconButton, Menu, MenuItem } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 
 interface HeaderProps {
-  employeeName: string;
+  employeeId: string;
   onLogout: () => void;
   anchorEl: null | HTMLElement;
   handleMenuOpen: (event: React.MouseEvent<HTMLElement>) => void;
   handleMenuClose: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ employeeName, onLogout, anchorEl, handleMenuOpen, handleMenuClose }) => {
+const Header: React.FC<HeaderProps> = ({ employeeId, onLogout, anchorEl, handleMenuOpen, handleMenuClose }) => {
   return (
     <Box sx={{
       bgcolor: '#111111', color: 'white', p: 2, display: 'flex',
@@ -23,21 +23,21 @@ const Header: React.FC<HeaderProps> = ({ employeeName, onLogout, anchorEl, handl
       borderRadius: 3,
     }}>
       <Typography variant="h6" sx={{ ml: 2, color: '#ffffff', textShadow: '1px 1px 2px rgba(0,0,0,0.1)' }}>
-        Hey {employeeName}!
+        Hey {employeeId}!
       </Typography>
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
-      <IconButton 
-  edge="end" 
-  aria-label="menu" 
-  onClick={handleMenuOpen}
-  sx={{ 
-    '& .MuiSvgIcon-root': {
-      color: '#ffffff'
-    }
-  }}
->
-  <MenuIcon />
-</IconButton>
+        <IconButton 
+          edge="end" 
+          aria-label="menu" 
+          onClick={handleMenuOpen}
+          sx={{ 
+            '& .MuiSvgIcon-root': {
+              color: '#ffffff'
+            }
+          }}
+        >
+          <MenuIcon />
+        </IconButton>
         <Menu
           anchorEl={anchorEl}
           open={Boolean(anchorEl)}

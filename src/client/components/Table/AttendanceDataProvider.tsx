@@ -7,8 +7,8 @@ const API_URL = 'https://attendance-backend-24xu.onrender.com/api/v1/attendance/
 
 const columns: Column[] = [
 
-  { id: "name", label: "Name" },
-  { id: "date", label: "Date" },
+  { id: "full_name", label: "Name" },
+  { id: "work_day", label: "Date" },
   { id: "status", label: "Status" },
 ];
 

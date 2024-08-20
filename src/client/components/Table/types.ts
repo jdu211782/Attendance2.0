@@ -8,14 +8,14 @@ export interface FilterState {
 
   export interface TableData {
     id: string;
-    name: string;
+    full_name: string;
     department: string;
-    role?: string;
-    date?: DateOrString;
+    position?: string;
+    work_day?: DateOrString;
     status?: string;
-    checkIn?: DateOrString;
-    checkOut?: DateOrString;
-    totalHrs?: number;
+    come_time?: DateOrString;
+    leave_time?: DateOrString;
+    total_hourse?: number;
     phone?: string;
     email?: string;
   }
