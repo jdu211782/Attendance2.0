@@ -11,6 +11,10 @@ const QrReader = () => {
   const [qrOn, setQrOn] = useState<boolean>(true);
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [pauseTimeoutId, setPauseTimeoutId] = useState<NodeJS.Timeout | null>(null);
+  const [lastScannedEmployeeId, setLastScannedEmployeeId] = useState<string | null>(null);
+  const [pauseDuration, setPauseDuration] = useState<number>(30000); // 30 seconds
+  const [scanCount, setScanCount] = useState<number>(0);
+  const [scanTimerId, setScanTimerId] = useState<NodeJS.Timeout | null>(null);
 
   // Function to get geolocation
   const getGeolocation = (): Promise<{ latitude: number; longitude: number }> => {
@@ -55,21 +59,35 @@ const QrReader = () => {
   const onScanSuccess = (result: QrScanner.ScanResult) => {
     const employee_id = result.data;
 
+    // Increment the scan count
+    setScanCount(prevCount => prevCount + 1);
+
+    // If the scan count is greater than 3 in 1 second, do nothing
+    if (scanCount >= 3) {
+      return;
+    }
+
     if (result?.data && !isPaused) {
       console.log("Scanned employee_id:", employee_id);
-      sendDataToServer(employee_id);
-      
-      // Set pause state to true and start a timer
-      setIsPaused(true);
-      if (pauseTimeoutId) {
-        clearTimeout(pauseTimeoutId); // Clear any existing timeout
+
+      // Check if the scanned employee ID is different from the last one
+      if (employee_id !== lastScannedEmployeeId) {
+        sendDataToServer(employee_id);
+        setLastScannedEmployeeId(employee_id);
+
+        // Set pause duration and start a timer
+        setPauseDuration(employee_id.startsWith("DK0003") ? 60000 : 30000); // 60 seconds for DK0003, 30 seconds for others
+        setIsPaused(true);
+        if (pauseTimeoutId) {
+          clearTimeout(pauseTimeoutId); // Clear any existing timeout
+        }
+        const timeoutId = setTimeout(() => setIsPaused(false), pauseDuration);
+        setPauseTimeoutId(timeoutId);
+      } else if (isPaused) {
+        // Do nothing, scanner is paused
+      } else {
+        alert("This is not the correct QR code.");
       }
-      const timeoutId = setTimeout(() => setIsPaused(false), 15000); // 15 seconds pause
-      setPauseTimeoutId(timeoutId);
-    } else if (isPaused) {
-      // Do nothing, scanner is paused
-    } else {
-      alert("This is not the correct QR code.");
     }
   };
 
@@ -94,11 +112,20 @@ const QrReader = () => {
         .catch((err) => {
           if (err) setQrOn(false);
         });
+
+      // Reset the scan count after 1 second
+      const timerId = setTimeout(() => {
+        setScanCount(0);
+      }, 1000);
+      setScanTimerId(timerId);
     }
 
     return () => {
       if (scanner.current) {
         scanner.current.stop();
+      }
+      if (scanTimerId) {
+        clearTimeout(scanTimerId);
       }
     };
   }, []);
