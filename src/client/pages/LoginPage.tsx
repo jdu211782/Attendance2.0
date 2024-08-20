@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import {
   Button,
   TextField,
@@ -7,6 +7,7 @@ import {
   Container,
   Box,
   useTheme,
+  Link,
 } from '@mui/material';
 import axiosInstance from '../../utils/libs/axios';
 import axios, { AxiosError } from 'axios';
@@ -33,7 +34,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
     }
 
     try {
-      console.log('Попытка входа c ID:', employee_id);
+      console.log('Попытка входа с ID:', employee_id);
       const response = await axiosInstance.post("/sign-in", {
         employee_id: employee_id,
         password: password,
@@ -176,6 +177,14 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
           >
             Sign in
           </Button>
+          <Link
+            component={RouterLink}
+            to="/qrreader"
+            variant="body2"
+            sx={{ mt: 2 }}
+          >
+            Перейти к QR-код ридеру
+          </Link>
         </Box>
       </Box>
     </Container>
