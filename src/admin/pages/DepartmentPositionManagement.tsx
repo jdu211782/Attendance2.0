@@ -33,6 +33,7 @@ function DepartmentPositionManagement() {
   const [selectedDepartment, setSelectedDepartment] = useState('');
   
   
+  
   useEffect(() => {
     fetchDepartments();
     fetchPositions();
@@ -42,23 +43,28 @@ function DepartmentPositionManagement() {
     try {
       const response = await axiosInstance().get('/department/list');
       if (response.data.status) {
-        setDepartments(response.data.data.results);
+        const departments = response.data.data.results;
+        console.log('Fetched Departments:', departments);
+        setDepartments(departments);
       }
     } catch (error) {
       console.error('Error fetching departments:', error);
     }
   };
-
+  
   const fetchPositions = async () => {
     try {
       const response = await axiosInstance().get('/position/list');
       if (response.data.status) {
-        setPositions(response.data.data.results);
+        const positions = response.data.data.results;
+        console.log('Fetched Positions:', positions);
+        setPositions(positions);
       }
     } catch (error) {
       console.error('Error fetching positions:', error);
     }
   };
+  
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);

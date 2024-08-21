@@ -15,8 +15,8 @@ const axiosInstance = () => {
     const token = localStorage.getItem('access_token');
     config.headers.Authorization =  token ? `Bearer ${token}` : '';
 
-    console.log('Токен:', token);
-    console.log('Данные запроса:', config.data);
+    // console.log('Токен:', token);
+    // console.log('Данные запроса:', config.data);
 
     return config;
   });
