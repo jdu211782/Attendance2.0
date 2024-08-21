@@ -19,8 +19,8 @@ function AdminDashboardContent() {
   const columns: Column[] = [
     { id: 'id', label: 'ID' },
     { id: 'full_name', label: 'Full Name', filterable: true },
-    { id: 'department', label: 'Department', filterable: true, filterValues: ['IT', 'HR'] },
-    { id: 'position', label: 'Position', filterable: true, filterValues: ['Developer', 'Manager'] },
+    { id: 'department', label: 'Department', filterable: true, filterValues: ['1-stage', '2-stage','3-stage','4-stage',] },
+    { id: 'position', label: 'Position', filterable: true, filterValues: ['Developer', 'Marketolog', 'Cloud Enginer', 'Software engineer', 'CEO'] },
     { id: 'work_day', label: 'Work day' },
     { id: 'status', label: 'Status', filterable: true, filterValues: ['Present', 'Absent'] },
     { id: 'come_time', label: 'Check In' },

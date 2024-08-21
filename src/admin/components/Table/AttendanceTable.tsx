@@ -19,6 +19,7 @@ import AttendanceTableHead from "./AttendanceTableHead";
 import AttendanceTableBody from "./AttendanceTableBody";
 import CalendarModal from "./CalendarModal";
 import axiosInstance from "../../../utils/libs/axios";
+import { Department, Position } from "../../pages/DepartmentPositionManagement";
 
 interface AttendanceTableProps {
   columns: Column[];

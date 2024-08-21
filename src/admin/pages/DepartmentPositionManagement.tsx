@@ -33,6 +33,7 @@ function DepartmentPositionManagement() {
   const [selectedDepartment, setSelectedDepartment] = useState('');
   
   
+  
   useEffect(() => {
     fetchDepartments();
     fetchPositions();
