@@ -17,7 +17,7 @@ const axiosInstance = () => {
 
     console.log('Токен:', token);
     console.log('Данные запроса:', config.data);
-    
+
     return config;
   });
 
@@ -63,6 +63,6 @@ export const createUser = async (employee_id: string, password: string, role: st
 };
 
 export const updateUser = async (id: number, employee_id: string, password: string, role: string, full_name: string, department_id: number, position_id: number, phone: string, email: string) => {
-  const response = await axiosInstance().put(`/user/${id}`, {employee_id, password, role, full_name, department_id, position_id, phone, email});
+  const response = await axiosInstance().patch(`/user/${id}`, {employee_id, password, role, full_name, department_id, position_id, phone, email});
   return response.data;
 };

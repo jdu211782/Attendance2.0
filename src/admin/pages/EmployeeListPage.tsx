@@ -41,9 +41,10 @@ const EmployeeListPage: React.FC = () => {
         updatedEmployee.phone!,
         updatedEmployee.email!
       );
-      setEmployeeData(prevData =>
-        prevData.map(emp => (emp.id === updatedEmployee.id ? updatedEmployee : emp))
-      );
+
+      console.log(updatedEmployee);
+      
+
       setEditModalOpen(false);
     } catch (error) {
       console.error('Ошибка при обновлении данных:', error);
@@ -72,7 +73,6 @@ const EmployeeListPage: React.FC = () => {
   const handleDelete = async (id: number) => {
     try {
       await axiosInstance().delete(`/user/${id}`);
-      setEmployeeData(prevData => prevData.filter(emp => emp.id !== id));
     } catch (error) {
       console.error('Ошибка при удалении сотрудника:', error);
     }

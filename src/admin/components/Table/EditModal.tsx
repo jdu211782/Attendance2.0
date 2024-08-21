@@ -40,6 +40,7 @@ const EditModal: React.FC<EditModalProps> = ({ open, data, onClose, onSave }) =>
       const response = await axiosInstance().get('/department/list');
       if (response.data.status) {
         setDepartments(response.data.data.results);
+        
       }
     } catch (error) {
       console.error('Error fetching departments:', error);
@@ -86,11 +87,13 @@ const EditModal: React.FC<EditModalProps> = ({ open, data, onClose, onSave }) =>
           formData.password!,        // Пароль
           formData.role!,            // Роль
           formData.full_name,       // Полное имя
-          formData.department_id!,   // ID департамента
-          formData.position_id!,     // ID позиции
+          departments.find((d) => d.name === formData.department)?.id!,
+          positions.find((p) => p.name === formData.position)?.id!,
           formData.phone!,           // Телефон
           formData.email!            // Email
         );
+        console.log(formData);
+        
         onSave(formData);
         onClose();
       } catch (error) {
@@ -100,6 +103,7 @@ const EditModal: React.FC<EditModalProps> = ({ open, data, onClose, onSave }) =>
   };
 
   if (!formData) return null;
+
 
   return (
     <Modal open={open} onClose={onClose}>
