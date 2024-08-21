@@ -13,14 +13,14 @@ function AdminDashboardContent() {
     absent: 0,
     late_arrival: 0,
     early_departures: 0,
-    time_off: 0,
+    early_come: 0,
   });
 
   const columns: Column[] = [
     { id: 'id', label: 'ID' },
     { id: 'full_name', label: 'Full Name', filterable: true },
     { id: 'department', label: 'Department', filterable: true, filterValues: ['IT', 'HR'] },
-    { id: 'position', label: 'Role', filterable: true, filterValues: ['Developer', 'Manager'] },
+    { id: 'position', label: 'Position', filterable: true, filterValues: ['Developer', 'Manager'] },
     { id: 'work_day', label: 'Work day' },
     { id: 'status', label: 'Status', filterable: true, filterValues: ['Present', 'Absent'] },
     { id: 'come_time', label: 'Check In' },
@@ -98,8 +98,8 @@ function AdminDashboardContent() {
           </div>
           <div className="Card">
             <div className="data">
-              <p className="Card-amount">{attendanceStats.time_off}</p>
-              <p className="Card-text">Time-off</p>
+              <p className="Card-amount">{attendanceStats.early_come}</p>
+              <p className="Card-text">Early Come</p>
             </div>
             <div className="icon">
               <img src={require("../../shared/png/time-off.png")}></img>
