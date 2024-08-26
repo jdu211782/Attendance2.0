@@ -9,6 +9,7 @@ import { Employee } from "./employees";
 import { Box, Grid } from "@mui/material";
 import "./shared/styles/App.css";
 import QrReader from "./client/pages/QrReader";
+import BigTablePage from "./client/pages/BigTable";
 
 const theme = createTheme({
   palette: {
@@ -69,6 +70,8 @@ function App() {
                     }
             />
             <Route path="/qrreader" element={<QrReader />} />
+            <Route path="/bigTable" element={<BigTablePage />} />
+            
           </Routes>
         </Box>
       </BrowserRouter>
