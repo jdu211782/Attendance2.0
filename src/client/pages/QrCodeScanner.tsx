@@ -2,14 +2,26 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import Webcam from 'react-webcam';
 import jsQR from 'jsqr';
 import { Box, Typography, Paper, Snackbar } from '@mui/material';
-import { createByQRCode } from '../../utils/libs/axios';
+import { createByQRCode } from '../../utils/libs/axios'; // Предполагаем, что функция импортируется из файла api
 
 const QRCodeScanner: React.FC = () => {
   const [result, setResult] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(true);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [location, setLocation] = useState<GeolocationCoordinates | null>(null);
   const webcamRef = useRef<Webcam | null>(null);
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => setLocation(position.coords),
+        (error) => console.error('Error getting location:', error)
+      );
+    } else {
+      console.error('Geolocation is not supported by this browser.');
+    }
+  }, []);
 
   const capture = useCallback(() => {
     if (webcamRef.current) {
@@ -29,7 +41,7 @@ const QRCodeScanner: React.FC = () => {
             if (code) {
               setResult(code.data);
               setIsScanning(false);
-              sendEmployeeId(code.data);
+              sendEmployeeIdWithLocation(code.data);
             }
           }
         };
@@ -37,15 +49,18 @@ const QRCodeScanner: React.FC = () => {
     }
   }, [webcamRef]);
 
-  const sendEmployeeId = async (employeeId: string) => {
+  const sendEmployeeIdWithLocation = async (employeeId: string) => {
     try {
-      const response = await createByQRCode(employeeId);
+      if (!location) {
+        throw new Error('Location is not available');
+      }
+      await createByQRCode(employeeId, location.latitude, location.longitude);
       setSnackbarMessage('Record created successfully');
       setSnackbarOpen(true);
     } catch (error) {
       setSnackbarMessage('Error creating record');
       setSnackbarOpen(true);
-      console.error('Error sending employee_id:', error);
+      console.error('Error sending employee_id and location:', error);
     }
   };
 
@@ -69,69 +84,26 @@ const QRCodeScanner: React.FC = () => {
   };
 
   return (
-    <Box sx={{ 
-      height: '100vh', 
-      width: '100vw', 
-      position: 'relative', 
-      overflow: 'hidden' 
-    }}>
-      {isScanning ? (
-        <>
+    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
+        <Typography variant="h5" gutterBottom>
+          QR Code Scanner
+        </Typography>
+        {isScanning ? (
           <Webcam
             audio={false}
             ref={webcamRef}
             screenshotFormat="image/jpeg"
             videoConstraints={{ facingMode: 'environment' }}
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover'
-            }}
           />
-          <Box sx={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '80%',
-            height: '80%',
-            border: '2px solid white',
-            boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.5)',
-            zIndex: 1
-          }} />
-          <Typography variant="h6" sx={{
-            position: 'absolute',
-            bottom: '10%',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            color: 'white',
-            textAlign: 'center',
-            zIndex: 2
-          }}>
-            Scan QR Code here
-          </Typography>
-        </>
-      ) : (
-        <Paper elevation={3} sx={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          padding: 4,
-          textAlign: 'center'
-        }}>
-          <Typography variant="h5" gutterBottom>
-            Scanning paused
-          </Typography>
-          <Typography variant="body1">
-            Please wait 5 seconds...
-          </Typography>
-          {result && (
-            <Typography variant="body2" sx={{ marginTop: 2 }}>
-              Last scanned employee_id: {result}
-            </Typography>
-          )}
-        </Paper>
+        ) : (
+          <Typography variant="body1">QR Code scanned. Resuming in 5 seconds...</Typography>
+        )}
+      </Paper>
+      {result && (
+        <Typography variant="body1" gutterBottom>
+          Scanned result: {result}
+        </Typography>
       )}
       <Snackbar
         open={snackbarOpen}
