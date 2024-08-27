@@ -1,11 +1,14 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import Webcam from 'react-webcam';
 import jsQR from 'jsqr';
-import { Box, Typography, Paper } from '@mui/material';
+import { Box, Typography, Paper, Snackbar } from '@mui/material';
+import { createByQRCode } from '../../utils/libs/axios';
 
 const QRCodeScanner: React.FC = () => {
   const [result, setResult] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(true);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
   const webcamRef = useRef<Webcam | null>(null);
 
   const capture = useCallback(() => {
@@ -34,8 +37,16 @@ const QRCodeScanner: React.FC = () => {
     }
   }, [webcamRef]);
 
-  const sendEmployeeId = (employeeId: string) => {
-    console.log(`Sending employee_id: ${employeeId}`);
+  const sendEmployeeId = async (employeeId: string) => {
+    try {
+      const response = await createByQRCode(employeeId);
+      setSnackbarMessage('Record created successfully');
+      setSnackbarOpen(true);
+    } catch (error) {
+      setSnackbarMessage('Error creating record');
+      setSnackbarOpen(true);
+      console.error('Error sending employee_id:', error);
+    }
   };
 
   useEffect(() => {
@@ -52,6 +63,10 @@ const QRCodeScanner: React.FC = () => {
       return () => clearTimeout(timer);
     }
   }, [isScanning, capture]);
+
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
+  };
 
   return (
     <Box sx={{ 
@@ -118,6 +133,12 @@ const QRCodeScanner: React.FC = () => {
           )}
         </Paper>
       )}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        message={snackbarMessage}
+      />
     </Box>
   );
 };
