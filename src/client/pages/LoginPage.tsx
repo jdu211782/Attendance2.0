@@ -179,7 +179,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
           </Button>
           <Link
   component={RouterLink}
-  to="/qrreader"
+  to="/qrscanner"
   variant="body2"
   sx={{ mt: 2, display: 'block' }} // display: 'block' переводит ссылку на новую строку
 >
