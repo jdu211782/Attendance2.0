@@ -1,6 +1,7 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import Webcam from 'react-webcam';
 import jsQR from 'jsqr';
+import { Box, Typography, Paper } from '@mui/material';
 
 const QRCodeScanner: React.FC = () => {
   const [result, setResult] = useState<string | null>(null);
@@ -34,8 +35,7 @@ const QRCodeScanner: React.FC = () => {
   }, [webcamRef]);
 
   const sendEmployeeId = (employeeId: string) => {
-    // Здесь вы можете отправить employee_id на сервер
-    console.log(`Отправка employee_id: ${employeeId}`);
+    console.log(`Sending employee_id: ${employeeId}`);
   };
 
   useEffect(() => {
@@ -54,19 +54,71 @@ const QRCodeScanner: React.FC = () => {
   }, [isScanning, capture]);
 
   return (
-    <div>
+    <Box sx={{ 
+      height: '100vh', 
+      width: '100vw', 
+      position: 'relative', 
+      overflow: 'hidden' 
+    }}>
       {isScanning ? (
-        <Webcam
-          audio={false}
-          ref={webcamRef}
-          screenshotFormat="image/jpeg"
-          videoConstraints={{ facingMode: 'environment' }}
-        />
+        <>
+          <Webcam
+            audio={false}
+            ref={webcamRef}
+            screenshotFormat="image/jpeg"
+            videoConstraints={{ facingMode: 'environment' }}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover'
+            }}
+          />
+          <Box sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '80%',
+            height: '80%',
+            border: '2px solid white',
+            boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.5)',
+            zIndex: 1
+          }} />
+          <Typography variant="h6" sx={{
+            position: 'absolute',
+            bottom: '10%',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            color: 'white',
+            textAlign: 'center',
+            zIndex: 2
+          }}>
+            Scan QR Code here
+          </Typography>
+        </>
       ) : (
-        <div>Пауза после сканирования. Подождите 5 секунд...</div>
+        <Paper elevation={3} sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          padding: 4,
+          textAlign: 'center'
+        }}>
+          <Typography variant="h5" gutterBottom>
+            Scanning paused
+          </Typography>
+          <Typography variant="body1">
+            Please wait 5 seconds...
+          </Typography>
+          {result && (
+            <Typography variant="body2" sx={{ marginTop: 2 }}>
+              Last scanned employee_id: {result}
+            </Typography>
+          )}
+        </Paper>
       )}
-      {result && <p>Последний отсканированный employee_id: {result}</p>}
-    </div>
+    </Box>
   );
 };
 
