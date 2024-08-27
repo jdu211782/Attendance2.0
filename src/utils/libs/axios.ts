@@ -84,7 +84,7 @@ export const uploadExcelFile = async (formData: FormData) => {
 
 export const createByQRCode = async (employee_id: string) => {
   try {
-    const response = await axiosInstance().post('/createbyqrcode', { employee_id });
+    const response = await axiosInstance().post('/attendance/createbyqrcode', { employee_id });
     return response.data;
   } catch (error) {
     console.error('Error creating record by QR code:', error);
