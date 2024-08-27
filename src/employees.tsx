@@ -2,7 +2,7 @@ export interface Employee {
   id: string;
   username: string;
   password: string;
-  role: 'ADMIN' | 'EMPLOYEE'; 
+  role: 'ADMIN' | 'EMPLOYEE' | 'SCANNER'; 
   checkInTime: Date | null;
   checkOutTime: Date | null;
   location: string;
