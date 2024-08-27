@@ -8,9 +8,9 @@ import AdminDashboard from "./admin/pages/AdminDashboard";
 import { Employee } from "./employees";
 import { Box, Grid } from "@mui/material";
 import "./shared/styles/App.css";
-import QrReader from "./client/pages/QrScanner";
+import QRCodeScanner from "./client/pages/QrCodeScanner";
 import BigTablePage from "./client/pages/BigTable";
-import { QrScanner } from "react-qr-scanner";
+
 
 const theme = createTheme({
   palette: {
@@ -70,7 +70,7 @@ function App() {
                       <AdminDashboard />
                     }
             />
-            <Route path="/qrscanner" element={<QrScanner />} />
+            <Route path="/qrscanner" element={<QRCodeScanner />} />
             <Route path="/bigTable" element={<BigTablePage />} />
             
           </Routes>
