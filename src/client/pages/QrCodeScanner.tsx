@@ -2,7 +2,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import Webcam from 'react-webcam';
 import jsQR from 'jsqr';
 import { Box, Typography, Paper, Snackbar } from '@mui/material';
-import { createByQRCode } from '../../utils/libs/axios'; // Предполагаем, что функция импортируется из файла api
+import { createByQRCode } from '../../utils/libs/axios';
 
 const QRCodeScanner: React.FC = () => {
   const [result, setResult] = useState<string | null>(null);
@@ -54,6 +54,11 @@ const QRCodeScanner: React.FC = () => {
       if (!location) {
         throw new Error('Location is not available');
       }
+      console.log('Отправляю данные:', {
+        employeeId,
+        latitude: location.latitude,
+        longitude: location.longitude,
+      });
       await createByQRCode(employeeId, location.latitude, location.longitude);
       setSnackbarMessage('Record created successfully');
       setSnackbarOpen(true);
