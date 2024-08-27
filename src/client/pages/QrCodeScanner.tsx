@@ -28,10 +28,13 @@ const QRCodeScanner: React.FC = () => {
   const sendEmployeeIdWithLocation = async (employeeId: string) => {
     try {
       const position = await getCurrentPosition();
-      console.log(position);
+      console.log(position.coords.latitude, position.coords.longitude);
+      console.log(employeeId);
+      
       
       const response = await createByQRCode(employeeId, position.coords.latitude, position.coords.longitude);
       console.log(response);
+      
       
       setSnackbarMessage('Запись успешно создана');
       setSnackbarOpen(true);
@@ -87,36 +90,75 @@ const QRCodeScanner: React.FC = () => {
     setSnackbarOpen(false);
   };
 
+
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
-        <Typography variant="h5" gutterBottom>
-          QR Code Scanner
-        </Typography>
-        {isScanning ? (
+    <Box sx={{ 
+      height: '100vh', 
+      width: '100vw', 
+      position: 'relative', 
+      overflow: 'hidden' 
+    }}>
+      {isScanning ? (
+        <>
           <Webcam
             audio={false}
             ref={webcamRef}
             screenshotFormat="image/jpeg"
             videoConstraints={{ facingMode: 'environment' }}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover'
+            }}
           />
-        ) : (
-          <Typography variant="body1">QR Code scanned. Resuming in 5 seconds...</Typography>
-        )}
-      </Paper>
-      {result && (
-        <Typography variant="body1" gutterBottom>
-          Scanned result: {result}
-        </Typography>
+          <Box sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '80%',
+            height: '80%',
+            border: '2px solid white',
+            boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.5)',
+            zIndex: 1
+          }} />
+          <Typography variant="h6" sx={{
+            position: 'absolute',
+            bottom: '10%',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            color: 'white',
+            textAlign: 'center',
+            zIndex: 2
+          }}>
+            Scan QR Code here
+          </Typography>
+        </>
+      ) : (
+        <Paper elevation={3} sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          padding: 4,
+          textAlign: 'center'
+        }}>
+          <Typography variant="h5" gutterBottom>
+            Scanning paused
+          </Typography>
+          <Typography variant="body1">
+            Please wait 5 seconds...
+          </Typography>
+          {result && (
+            <Typography variant="body2" sx={{ marginTop: 2 }}>
+              Last scanned employee_id: {result}
+            </Typography>
+          )}
+        </Paper>
       )}
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={6000}
-        onClose={handleSnackbarClose}
-        message={snackbarMessage}
-      />
     </Box>
   );
 };
 
 export default QRCodeScanner;
+
