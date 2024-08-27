@@ -66,3 +66,18 @@ export const updateUser = async (id: number, employee_id: string, password: stri
   const response = await axiosInstance().patch(`/user/${id}`, {employee_id, password, role, full_name, department_id, position_id, phone, email});
   return response.data;
 };
+
+export const uploadExcelFile = async (formData: FormData) => {
+  try {
+    const response = await axiosInstance().post('/upload/excel', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('Ошибка при загрузке файла:', error);
+    throw error;
+  }
+};

@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Box, Typography, Paper, Button } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EmployeeTable from '../components/Table/EmployeeTable';
 import EditModal from '../components/Table/EditModal';
 import CreateEmployeeModal from '../components/Table/CreateEmployeeModal';
+import UploadExcelModal from '../components/Table/UploadExcelModal'; // Импортируем модальное окно для загрузки файла
 import { TableData, Column } from '../components/Table/types';
-import axiosInstance, { updateUser, createUser } from '../../utils/libs/axios';
+import axiosInstance, { updateUser, createUser, uploadExcelFile } from '../../utils/libs/axios';
 
 const columns: Column[] = [
   { id: 'employee_id', label: 'Login'}, 
@@ -20,6 +21,7 @@ const columns: Column[] = [
 const EmployeeListPage: React.FC = () => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [uploadModalOpen, setUploadModalOpen] = useState(false); // Добавляем состояние для модального окна загрузки файла
   const [selectedEmployee, setSelectedEmployee] = useState<TableData | null>(null);
   const [employeeData, setEmployeeData] = useState<TableData[]>([]);
 
@@ -78,19 +80,45 @@ const EmployeeListPage: React.FC = () => {
     }
   };
 
+  const handleFileUpload = async (file: File) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await uploadExcelFile(formData);
+
+      // Обработайте ответ после успешной загрузки
+      console.log('Файл успешно загружен:', response);
+
+      // Закройте модальное окно после загрузки
+      setUploadModalOpen(false);
+    } catch (error) {
+      console.error('Ошибка при загрузке файла:', error);
+    }
+  };
 
   return (
     <Box sx={{ p: 3 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h4">Employee List</Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => setCreateModalOpen(true)}
-          sx={{ bgcolor: '#00D891', '&:hover': { bgcolor: '#00AB73' } }}
-        >
-          Create
-        </Button>
+        <Box>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => setCreateModalOpen(true)}
+            sx={{ bgcolor: '#00D891', '&:hover': { bgcolor: '#00AB73' } }}
+          >
+            Create
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => setUploadModalOpen(true)}
+            sx={{ bgcolor: '#00D891', '&:hover': { bgcolor: '#00AB73' }, ml: 2 }}
+          >
+            Upload Excel
+          </Button>
+        </Box>
       </Box>
       <EmployeeTable
         columns={columns}
@@ -109,6 +137,11 @@ const EmployeeListPage: React.FC = () => {
         open={createModalOpen}
         onClose={() => setCreateModalOpen(false)}
         onSave={handleCreateSave}
+      />
+      <UploadExcelModal
+        open={uploadModalOpen}
+        onClose={() => setUploadModalOpen(false)}
+        onUpload={handleFileUpload}
       />
     </Box>
   );
