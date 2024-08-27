@@ -74,7 +74,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         // Обновленная логика перенаправления
         if (tempEmployeeData.role === 'ADMIN') {
           navigate("/admin");
-        } else if (tempEmployeeData.role === 'SCANNER') {
+        } else if (tempEmployeeData.role === 'QRCODE') {
           navigate("/qrscanner");
         } else {
           navigate("/");
