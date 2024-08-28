@@ -43,12 +43,12 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
       console.log('Ответ от сервера:', response);
 
       if (response.data && response.data.data && response.data.data.access_token) {
-        // const accessToken = response.data.data.access_token;
-        // const refreshToken = response.data.data.refresh_token;
+        const accessToken = response.data.data.access_token;
+        const refreshToken = response.data.data.refresh_token;
         
-        // localStorage.setItem("access_token", accessToken);
-        // localStorage.setItem("refresh_token", refreshToken);
-        // console.log('Токены сохранены в localStorage');
+        localStorage.setItem("access_token", accessToken);
+        localStorage.setItem("refresh_token", refreshToken);
+        console.log('Токены сохранены в localStorage');
 
         const tempEmployeeData: Employee = {
           id: employee_id,
@@ -71,10 +71,15 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         console.log('Временные данные сотрудника:', tempEmployeeData);
         onLoginSuccess(tempEmployeeData);
         
+        // Обновленная логика перенаправления
         if (tempEmployeeData.role === 'ADMIN') {
           navigate("/admin");
+        } else if (tempEmployeeData.role === 'QRCODE') {
+          navigate("/qrscanner");
+        } else if (tempEmployeeData.role === 'DASHBOARD') {
+          navigate("/bigTable");
         } else {
-          navigate("/");
+          navigate("/employee");
         }
       } else {
         console.error('Токены отсутствуют в ответе');
@@ -178,13 +183,21 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             Sign in
           </Button>
           <Link
-            component={RouterLink}
-            to="/qrreader"
-            variant="body2"
-            sx={{ mt: 2 }}
-          >
-            Перейти к QR-код ридеру
-          </Link>
+  component={RouterLink}
+  to="/qrscanner"
+  variant="body2"
+  sx={{ mt: 2, display: 'block' }} // display: 'block' переводит ссылку на новую строку
+>
+  QRcode-Reader
+</Link>
+<Link
+  component={RouterLink}
+  to="/bigTable"
+  variant="body2"
+  sx={{ mt: 2, display: 'block' }} // display: 'block' переводит ссылку на новую строку
+>
+  AttendanceTable
+</Link>
         </Box>
       </Box>
     </Container>

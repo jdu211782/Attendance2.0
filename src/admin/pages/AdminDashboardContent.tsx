@@ -4,28 +4,42 @@ import PieChartWithCustomizedLabel from "../components/pie";
 import SimpleBarChart from "../components/Bar";
 import AttendanceTable from "../components/Table/AttendanceTable";
 import { Column } from "../components/Table/types";
-import axiosInstance from '../../utils/libs/axios';
+import axiosInstance, {fetchDepartments, fetchPositions } from '../../utils/libs/axios';
+
+export interface Department {
+  id: number;
+  name: string;
+}
+
+export interface Position {
+  id: number;
+  name: string;
+  department_id: number;
+  department: string;
+}
 
 function AdminDashboardContent() {
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [positions, setPositions] = useState<Position[]>([]);
   const [attendanceStats, setAttendanceStats] = useState({
     total_employee: 0,
     ontime: 0,
     absent: 0,
     late_arrival: 0,
     early_departures: 0,
-    time_off: 0,
+    early_come: 0,
   });
 
   const columns: Column[] = [
-    { id: 'id', label: 'ID' },
-    { id: 'full_name', label: 'Full Name', filterable: true },
-    { id: 'department', label: 'Department', filterable: true, filterValues: ['IT', 'HR'] },
-    { id: 'position', label: 'Role', filterable: true, filterValues: ['Developer', 'Manager'] },
-    { id: 'work_day', label: 'Work day' },
-    { id: 'status', label: 'Status', filterable: true, filterValues: ['Present', 'Absent'] },
-    { id: 'come_time', label: 'Check In' },
-    { id: 'leave_time', label: 'Check Out' },
-    { id: 'total_hourse', label: 'Total Hours' },
+    { id: 'employee_id', label: 'ID' },
+    { id: 'full_name', label: '名前', filterable: true },
+    { id: 'department', label: '部署', filterable: true},
+    { id: 'position', label: '役職', filterable: true},
+    { id: 'work_day', label: '勤務日' },
+    { id: 'status', label: '状態', filterable: true},
+    { id: 'come_time', label: '出勤時間' },
+    { id: 'leave_time', label: '退勤時間' },
+    { id: 'total_hourse', label: '総労働時間' },
   ] as Column[];
 
   useEffect(() => {
@@ -41,6 +55,30 @@ function AdminDashboardContent() {
     };
 
     fetchAttendanceStats();
+  }, []);
+
+  useEffect(() => {
+    const loadDepartments = async () => {
+      try {
+        const response = await fetchDepartments();
+        setDepartments(response); 
+      } catch (error) {
+        console.error("Failed to fetch departments", error);
+      }
+    };
+
+    const loadPositions = async () => {
+      try {
+        const response = await fetchPositions();
+        setPositions(response); 
+      } catch (error) {
+        console.error("Failed to fetch positions", error);
+      }
+    };
+
+
+    loadDepartments();
+    loadPositions();
   }, []);
   
   return (
@@ -98,8 +136,8 @@ function AdminDashboardContent() {
           </div>
           <div className="Card">
             <div className="data">
-              <p className="Card-amount">{attendanceStats.time_off}</p>
-              <p className="Card-text">Time-off</p>
+              <p className="Card-amount">{attendanceStats.early_come}</p>
+              <p className="Card-text">Early Come</p>
             </div>
             <div className="icon">
               <img src={require("../../shared/png/time-off.png")}></img>
@@ -116,7 +154,7 @@ function AdminDashboardContent() {
         </div>
       </div>
       <div className="TableSection">
-        <AttendanceTable columns={columns} showCalendar={true}/>
+        <AttendanceTable departments={departments} positions={positions} columns={columns} showCalendar={true}/>
       </div>
     </>
   );

@@ -57,7 +57,7 @@ const AttendanceTableBody: React.FC<AttendanceTableBodyProps> = ({
             if (column.id === 'action') {
               return (
                 <TableCell key={column.id} sx={{ padding: '8px 16px' }}>
-                  <Box sx={{ display: 'flex', gap: 1 }}>
+                  <Box sx={{ display: 'flex', gap: 0.5  }}>
                     {onEdit && (
                       <Button onClick={() => onEdit(row)} variant="outlined" size="small">
                         Edit
@@ -82,6 +82,8 @@ const AttendanceTableBody: React.FC<AttendanceTableBodyProps> = ({
             const { backgroundColor, color } = column.id === 'status' && typeof value === 'boolean'
               ? getStatusStyles(value as boolean)
               : { backgroundColor: '#fff', color: '#000' };
+
+              
 
             return (
               <TableCell key={column.id} sx={{ padding: '8px 16px' }}>
@@ -120,7 +122,7 @@ const AttendanceTableBody: React.FC<AttendanceTableBodyProps> = ({
                         alignItems: 'center',
                         justifyContent: 'center',
                         height: 36,
-                        minWidth: 120,
+                        minWidth: 100,
                         cursor: 'pointer'
                       }}
                       onClick={() => setEditingRowId(row.id)}
@@ -141,3 +143,4 @@ const AttendanceTableBody: React.FC<AttendanceTableBodyProps> = ({
 };
 
 export default AttendanceTableBody;
+
